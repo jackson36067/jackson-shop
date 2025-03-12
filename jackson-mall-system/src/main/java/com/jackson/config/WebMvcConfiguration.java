@@ -22,7 +22,9 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/api/category/list",
                         "/api/member/login",
-                        "/api/member/code"
+                        "/api/member/code",
+                        "/api/column/list",
+                        "/api/column/detail/**"
                 );
     }
 
