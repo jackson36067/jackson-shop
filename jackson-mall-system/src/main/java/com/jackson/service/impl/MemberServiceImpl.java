@@ -5,8 +5,10 @@ import cn.hutool.core.util.RandomUtil;
 import com.jackson.constant.EmailConstant;
 import com.jackson.constant.MemberConstant;
 import com.jackson.constant.RedisConstant;
+import com.jackson.context.BaseContext;
 import com.jackson.dto.MemberLoginDTO;
 import com.jackson.dto.MemberSendCodeDTO;
+import com.jackson.dto.UpdateMemberDTO;
 import com.jackson.entity.ShopMember;
 import com.jackson.exception.AccountLockException;
 import com.jackson.exception.CodeErrorException;
@@ -15,16 +17,21 @@ import com.jackson.exception.PasswordErrorException;
 import com.jackson.repository.MemberRepository;
 import com.jackson.result.Result;
 import com.jackson.service.MemberService;
+import com.jackson.utils.AliOssUtils;
 import com.jackson.utils.JwtUtils;
 import com.jackson.utils.MailUtils;
 import com.jackson.vo.MemberLoginVO;
+import com.jackson.vo.MemberVO;
 import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -36,6 +43,8 @@ public class MemberServiceImpl implements MemberService {
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private MailUtils mailUtils;
+    @Resource
+    private AliOssUtils aliOssUtils;
 
     /**
      * 用户登录
@@ -98,5 +107,67 @@ public class MemberServiceImpl implements MemberService {
         mailUtils.sendMessage(email, EmailConstant.EMAIL_SUBJECT, code);
         // 将验证码保存到Redis中,其中key以email进行区分,并设置过期时间为2分钟
         stringRedisTemplate.opsForValue().set(RedisConstant.SHOP_EMAIL_CODE_PREFIX + email, code, RedisConstant.CODE_EXPIRE_TIME, TimeUnit.MINUTES);
+    }
+
+    /**
+     * 获取个人信息
+     *
+     * @return
+     */
+    public Result<MemberVO> getMemberInfo() {
+        Long memberId = BaseContext.getCurrentId();
+        ShopMember shopMember = memberRepository.findById(memberId).get();
+        MemberVO memberVO = BeanUtil.copyProperties(shopMember, MemberVO.class);
+        return Result.success(memberVO);
+    }
+
+    /**
+     * 上传图片接口
+     *
+     * @param file 图片文件
+     * @return
+     */
+    public Result<String> uploadImage(MultipartFile file) {
+        // 调用ali-util上传图片并且返回图片地址
+        String avatarUrl = aliOssUtils.upload(file);
+        return Result.success(avatarUrl);
+    }
+
+    /**
+     * 更新用户接口
+     *
+     * @param updateMemberDTO 更新用户数据参数
+     */
+    public void updateMember(UpdateMemberDTO updateMemberDTO) {
+        ShopMember shopMember = memberRepository.findById(updateMemberDTO.getId()).get();
+        // 判断是否需要更新用户名
+        if (!StringUtil.isNullOrEmpty(updateMemberDTO.getNickname()) && !updateMemberDTO.getNickname().equals(shopMember.getNickname())) {
+            shopMember.setNickname(updateMemberDTO.getNickname());
+        }
+        // 判读是否需要更新头像
+        if (!StringUtil.isNullOrEmpty(updateMemberDTO.getAvatar()) && !updateMemberDTO.getAvatar().equals(shopMember.getAvatar())) {
+            shopMember.setAvatar(updateMemberDTO.getAvatar());
+        }
+        // 判断是否需要修改性别
+        if (updateMemberDTO.getGender() != null && !Objects.equals(updateMemberDTO.getGender(), shopMember.getGender())) {
+            shopMember.setGender(updateMemberDTO.getGender());
+        }
+        // 判断是否需要修改生日
+        if (updateMemberDTO.getBirthday() != null && !Objects.equals(updateMemberDTO.getBirthday(), shopMember.getBirthday())) {
+            shopMember.setBirthday(updateMemberDTO.getBirthday());
+        }
+        // 判断是否需要修改密码
+        if (!StringUtil.isNullOrEmpty(updateMemberDTO.getPassword()) && !updateMemberDTO.getPassword().equals(shopMember.getPassword())) {
+            shopMember.setPassword(updateMemberDTO.getPassword());
+        }
+        // 判断是否需要修改手机号
+        if (!StringUtil.isNullOrEmpty(updateMemberDTO.getMobile()) && !updateMemberDTO.getMobile().equals(shopMember.getMobile())) {
+            shopMember.setMobile(updateMemberDTO.getMobile());
+        }
+        // 判断是否需要修改邮箱
+        if (!StringUtil.isNullOrEmpty(updateMemberDTO.getEmail()) && !updateMemberDTO.getEmail().equals(shopMember.getEmail())) {
+            shopMember.setEmail(updateMemberDTO.getEmail());
+        }
+        memberRepository.saveAndFlush(shopMember);
     }
 }
