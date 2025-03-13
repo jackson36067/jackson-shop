@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -39,7 +41,7 @@ public class ShopColumn {
             joinColumns = {@JoinColumn(name = "column_id", referencedColumnName = "id")},
             inverseJoinColumns = {@JoinColumn(name = "goods_id", referencedColumnName = "id")}
     )
-    private Set<ShopGood> shopGood;
+    private List<ShopGood> shopGood;
 
     @ColumnDefault("0")
     @Column(name = "del_flag")
@@ -104,11 +106,11 @@ public class ShopColumn {
         this.updateTime = updateTime;
     }
 
-    public Set<ShopGood> getShopGood() {
+    public List<ShopGood> getShopGood() {
         return shopGood;
     }
 
-    public void setShopGood(Set<ShopGood> shopGood) {
+    public void setShopGood(List<ShopGood> shopGood) {
         this.shopGood = shopGood;
     }
 
@@ -133,7 +135,7 @@ public class ShopColumn {
         return Objects.hash(id, name, sort, bgPic, detailPic, createTime, updateTime, shopGood, delFlag);
     }
 
-    public ShopColumn(Long id, String name, Short sort, String bgPic, String detailPic, LocalDateTime createTime, LocalDateTime updateTime, Set<ShopGood> shopGood, Boolean delFlag) {
+    public ShopColumn(Long id, String name, Short sort, String bgPic, String detailPic, LocalDateTime createTime, LocalDateTime updateTime, List<ShopGood> shopGood, Boolean delFlag) {
         this.id = id;
         this.name = name;
         this.sort = sort;

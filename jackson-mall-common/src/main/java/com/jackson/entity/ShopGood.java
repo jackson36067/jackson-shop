@@ -3,13 +3,17 @@ package com.jackson.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "shop_goods")
-public class ShopGood {
+public class ShopGood implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -98,10 +102,16 @@ public class ShopGood {
     @Column(name = "del_flag")
     private Boolean delFlag;
 
+    @ManyToMany(mappedBy = "shopGood")
+    private List<ShopColumn> shopColumnList;
+
+    @ManyToMany(mappedBy = "shopGoodSet")
+    private List<ShopChannel> shopChannels;
+
     public ShopGood() {
     }
 
-    public ShopGood(Long id, String goodsSn, String name, ShopCategory shopCategory, Long brandId, String gallery, String keywords, String brief, Boolean isOnSale, Integer sort, String picUrl, String shareUrl, Boolean isNew, Boolean isHot, String unit, BigDecimal counterPrice, BigDecimal retailPrice, Integer actualSales, Integer virtualSales, String detail, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag) {
+    public ShopGood(Long id, String goodsSn, String name, ShopCategory shopCategory, Long brandId, String gallery, String keywords, String brief, Boolean isOnSale, Integer sort, String picUrl, String shareUrl, Boolean isNew, Boolean isHot, String unit, BigDecimal counterPrice, BigDecimal retailPrice, Integer actualSales, Integer virtualSales, String detail, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopColumn> shopColumnList, List<ShopChannel> shopChannels) {
         this.id = id;
         this.goodsSn = goodsSn;
         this.name = name;
@@ -125,6 +135,8 @@ public class ShopGood {
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.delFlag = delFlag;
+        this.shopColumnList = shopColumnList;
+        this.shopChannels = shopChannels;
     }
 
     public Long getId() {
@@ -223,19 +235,19 @@ public class ShopGood {
         this.shareUrl = shareUrl;
     }
 
-    public Boolean getIsNew() {
+    public Boolean getNew() {
         return isNew;
     }
 
-    public void setIsNew(Boolean aNew) {
+    public void setNew(Boolean aNew) {
         isNew = aNew;
     }
 
-    public Boolean getIsHot() {
+    public Boolean getHot() {
         return isHot;
     }
 
-    public void setIsHot(Boolean hot) {
+    public void setHot(Boolean hot) {
         isHot = hot;
     }
 
@@ -310,17 +322,34 @@ public class ShopGood {
     public void setDelFlag(Boolean delFlag) {
         this.delFlag = delFlag;
     }
+
+    public List<ShopColumn> getShopColumnList() {
+        return shopColumnList;
+    }
+
+    public void setShopColumnList(List<ShopColumn> shopColumnList) {
+        this.shopColumnList = shopColumnList;
+    }
+
+    public List<ShopChannel> getShopChannels() {
+        return shopChannels;
+    }
+
+    public void setShopChannels(List<ShopChannel> shopChannels) {
+        this.shopChannels = shopChannels;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopGood shopGood = (ShopGood) o;
-        return Objects.equals(id, shopGood.id) && Objects.equals(goodsSn, shopGood.goodsSn) && Objects.equals(name, shopGood.name) && Objects.equals(shopCategory, shopGood.shopCategory) && Objects.equals(brandId, shopGood.brandId) && Objects.equals(gallery, shopGood.gallery) && Objects.equals(keywords, shopGood.keywords) && Objects.equals(brief, shopGood.brief) && Objects.equals(isOnSale, shopGood.isOnSale) && Objects.equals(sort, shopGood.sort) && Objects.equals(picUrl, shopGood.picUrl) && Objects.equals(shareUrl, shopGood.shareUrl) && Objects.equals(isNew, shopGood.isNew) && Objects.equals(isHot, shopGood.isHot) && Objects.equals(unit, shopGood.unit) && Objects.equals(counterPrice, shopGood.counterPrice) && Objects.equals(retailPrice, shopGood.retailPrice) && Objects.equals(actualSales, shopGood.actualSales) && Objects.equals(virtualSales, shopGood.virtualSales) && Objects.equals(detail, shopGood.detail) && Objects.equals(createTime, shopGood.createTime) && Objects.equals(updateTime, shopGood.updateTime) && Objects.equals(delFlag, shopGood.delFlag);
+        return Objects.equals(id, shopGood.id) && Objects.equals(goodsSn, shopGood.goodsSn) && Objects.equals(name, shopGood.name) && Objects.equals(shopCategory, shopGood.shopCategory) && Objects.equals(brandId, shopGood.brandId) && Objects.equals(gallery, shopGood.gallery) && Objects.equals(keywords, shopGood.keywords) && Objects.equals(brief, shopGood.brief) && Objects.equals(isOnSale, shopGood.isOnSale) && Objects.equals(sort, shopGood.sort) && Objects.equals(picUrl, shopGood.picUrl) && Objects.equals(shareUrl, shopGood.shareUrl) && Objects.equals(isNew, shopGood.isNew) && Objects.equals(isHot, shopGood.isHot) && Objects.equals(unit, shopGood.unit) && Objects.equals(counterPrice, shopGood.counterPrice) && Objects.equals(retailPrice, shopGood.retailPrice) && Objects.equals(actualSales, shopGood.actualSales) && Objects.equals(virtualSales, shopGood.virtualSales) && Objects.equals(detail, shopGood.detail) && Objects.equals(createTime, shopGood.createTime) && Objects.equals(updateTime, shopGood.updateTime) && Objects.equals(delFlag, shopGood.delFlag) && Objects.equals(shopColumnList, shopGood.shopColumnList) && Objects.equals(shopChannels, shopGood.shopChannels);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, goodsSn, name, shopCategory, brandId, gallery, keywords, brief, isOnSale, sort, picUrl, shareUrl, isNew, isHot, unit, counterPrice, retailPrice, actualSales, virtualSales, detail, createTime, updateTime, delFlag);
+        return Objects.hash(id, goodsSn, name, shopCategory, brandId, gallery, keywords, brief, isOnSale, sort, picUrl, shareUrl, isNew, isHot, unit, counterPrice, retailPrice, actualSales, virtualSales, detail, createTime, updateTime, delFlag, shopColumnList, shopChannels);
     }
 
     @Override
@@ -349,6 +378,8 @@ public class ShopGood {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", delFlag=" + delFlag +
+                ", shopColumnList=" + shopColumnList +
+                ", shopChannels=" + shopChannels +
                 '}';
     }
 }

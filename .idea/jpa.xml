@@ -2,7 +2,7 @@
 <project version="4">
   <component name="JpaBuddyIdeaProjectConfig">
     <option name="defaultUnitInitialized" value="true" />
-    <option name="reLastEntityCreationPackage" value="jackson-mall-system/src/main/java/com/jackson" />
+    <option name="reLastEntityCreationPackage" value="jackson-mall-common/src/main/java/com/jackson/entity" />
     <option name="renamerInitialized" value="true" />
     <option name="reverseEngineeringLastDbConnectionId" value="e91fce48-057b-4fc4-8e52-a0078c24a1ae__jackson_mall" />
   </component>

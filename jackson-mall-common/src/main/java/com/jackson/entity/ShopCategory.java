@@ -5,7 +5,9 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "shop_category")
@@ -57,10 +59,13 @@ public class ShopCategory implements Serializable {
     @Column(name = "del_flag")
     private Boolean delFlag;
 
+    @OneToMany(mappedBy = "shopCategory")
+    private List<ShopGood> shopGoodSet;
+
     public ShopCategory() {
     }
 
-    public ShopCategory(Long id, String name, String keywords, String remark, Integer pid, String iconUrl, String picUrl, String level, Integer sort, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag) {
+    public ShopCategory(Long id, String name, String keywords, String remark, Integer pid, String iconUrl, String picUrl, String level, Integer sort, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopGood> shopGoodSet) {
         this.id = id;
         this.name = name;
         this.keywords = keywords;
@@ -73,6 +78,7 @@ public class ShopCategory implements Serializable {
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.delFlag = delFlag;
+        this.shopGoodSet = shopGoodSet;
     }
 
     public Long getId() {
@@ -171,17 +177,25 @@ public class ShopCategory implements Serializable {
         this.delFlag = delFlag;
     }
 
+    public List<ShopGood> getShopGoodSet() {
+        return shopGoodSet;
+    }
+
+    public void setShopGoodSet(List<ShopGood> shopGoodSet) {
+        this.shopGoodSet = shopGoodSet;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopCategory that = (ShopCategory) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(keywords, that.keywords) && Objects.equals(remark, that.remark) && Objects.equals(pid, that.pid) && Objects.equals(iconUrl, that.iconUrl) && Objects.equals(picUrl, that.picUrl) && Objects.equals(level, that.level) && Objects.equals(sort, that.sort) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(keywords, that.keywords) && Objects.equals(remark, that.remark) && Objects.equals(pid, that.pid) && Objects.equals(iconUrl, that.iconUrl) && Objects.equals(picUrl, that.picUrl) && Objects.equals(level, that.level) && Objects.equals(sort, that.sort) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag) && Objects.equals(shopGoodSet, that.shopGoodSet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, keywords, remark, pid, iconUrl, picUrl, level, sort, createTime, updateTime, delFlag);
+        return Objects.hash(id, name, keywords, remark, pid, iconUrl, picUrl, level, sort, createTime, updateTime, delFlag, shopGoodSet);
     }
 
     @Override
@@ -199,6 +213,7 @@ public class ShopCategory implements Serializable {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", delFlag=" + delFlag +
+                ", shopGoodSet=" + shopGoodSet +
                 '}';
     }
 }
