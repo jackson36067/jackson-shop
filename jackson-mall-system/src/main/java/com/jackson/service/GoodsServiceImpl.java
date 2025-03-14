@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.jackson.constant.GoodsConstant;
 import com.jackson.entity.ShopGood;
 import com.jackson.repository.GoodsRepository;
+import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
 import com.jackson.vo.GoodsMessageVO;
 import jakarta.annotation.Resource;
@@ -26,13 +27,16 @@ public class GoodsServiceImpl implements GoodsService {
     /**
      * 获取热门商品或者新品
      *
-     * @param type  0.新品 1.热销
+     * @param type     0.新品 1.热销
      * @param isAll
+     * @param page
+     * @param pageSize
      * @return
      */
-    public Result<List<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll) {
-        // 用于暂时存放查询条件,存放到查询条件List中
+    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, Integer page, Integer pageSize) {
+        // 封装可变条件 -> 判断条件是获取最新还是热销商品
         Specification<ShopGood> shopGoodSpecification = (root, query, cb) -> {
+            // 用于暂时存放查询条件,存放到查询条件List中
             ArrayList<Predicate> predicateList = new ArrayList<>();
             if (type == 1) {
                 Predicate isHot = cb.equal(root.get(GoodsConstant.IS_HOT), true);
@@ -47,17 +51,27 @@ public class GoodsServiceImpl implements GoodsService {
         };
         Sort sort = Sort.by(Sort.Direction.ASC, GoodsConstant.SORT_COLUMN);
         List<ShopGood> shopGoodList;
+        //  通过isAll参数判断是否获取全部商品
+        boolean isRemain = true;
         if (!isAll) {
+            // 前端首页获取部分商品
             // 分页器
             PageRequest pageRequest = PageRequest.of(GoodsConstant.GOODS_PAGE_NUMBER, GoodsConstant.GOODS_PAGE_SIZE, sort);
             Page<ShopGood> shopGoodPage = goodsRepository.findAll(shopGoodSpecification, pageRequest);
             shopGoodList = shopGoodPage.getContent();
         } else {
-            shopGoodList = goodsRepository.findAll(shopGoodSpecification, sort);
+            // 点击查看所有商品 -> 做一个下滑获取其余商品的效果
+            PageRequest pageRequest = PageRequest.of(page - 1, pageSize, sort);
+            Page<ShopGood> shopGoodPage = goodsRepository.findAll(shopGoodSpecification, pageRequest);
+            if (shopGoodPage.getContent().isEmpty()) {
+                isRemain = false;
+            }
+            shopGoodList = shopGoodPage.getContent();
         }
         List<GoodsMessageVO> goodsMessageVOList = shopGoodList.stream()
                 .map(shopGood -> BeanUtil.copyProperties(shopGood, GoodsMessageVO.class))
                 .toList();
-        return Result.success(goodsMessageVOList);
+        GoodsPageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new GoodsPageResult<>(goodsMessageVOList, isRemain);
+        return Result.success(goodsMessageVOGoodsPageResult);
     }
 }

@@ -1,5 +1,6 @@
 package com.jackson.controller;
 
+import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
 import com.jackson.vo.GoodsMessageVO;
@@ -23,7 +24,7 @@ public class GoodsController {
      * @return
      */
     @GetMapping
-    public Result<List<GoodsMessageVO>> getHotOrNewGoods(Integer type,Boolean isAll){
-        return goodsService.getHotOrNewGoods(type,isAll);
+    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, Integer page, Integer pageSize){
+        return goodsService.getHotOrNewGoods(type,isAll,page,pageSize);
     }
 }
