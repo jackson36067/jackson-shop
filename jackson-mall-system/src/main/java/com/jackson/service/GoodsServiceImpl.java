@@ -74,4 +74,28 @@ public class GoodsServiceImpl implements GoodsService {
         GoodsPageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new GoodsPageResult<>(goodsMessageVOList, isRemain);
         return Result.success(goodsMessageVOGoodsPageResult);
     }
+
+    /**
+     * 根据分类id获取商品
+     *
+     * @param id       分类id
+     * @param page     页数
+     * @param pageSize 页码
+     * @return
+     */
+    public Result<GoodsPageResult<GoodsMessageVO>> getGoodsByCategoryId(Long id, Integer page, Integer pageSize) {
+        Sort sort = Sort.by(Sort.Direction.ASC, GoodsConstant.SORT_COLUMN);
+        PageRequest pageRequest = PageRequest.of(page, pageSize, sort);
+        boolean isRemain = true;
+        Page<ShopGood> shopGoodPage = goodsRepository.findAllByShopCategoryId(id, pageRequest);
+        if (shopGoodPage.getContent().isEmpty()) {
+            isRemain = false;
+        }
+        List<ShopGood> shopGoodList = shopGoodPage.getContent();
+        List<GoodsMessageVO> goodsMessageVOList = shopGoodList.stream()
+                .map(shopGood -> BeanUtil.copyProperties(shopGood, GoodsMessageVO.class))
+                .toList();
+        GoodsPageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new GoodsPageResult<>(goodsMessageVOList, isRemain);
+        return Result.success(goodsMessageVOGoodsPageResult);
+    }
 }
