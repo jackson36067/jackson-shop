@@ -1,4 +1,4 @@
-package com.jackson.service;
+package com.jackson.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.jackson.constant.GoodsConstant;
@@ -6,6 +6,7 @@ import com.jackson.entity.ShopGood;
 import com.jackson.repository.GoodsRepository;
 import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
+import com.jackson.service.GoodsService;
 import com.jackson.vo.GoodsMessageVO;
 import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.Predicate;

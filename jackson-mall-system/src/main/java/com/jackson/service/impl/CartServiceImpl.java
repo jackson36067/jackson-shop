@@ -29,6 +29,10 @@ public class CartServiceImpl implements CartService {
      */
     public Result<List<CartGoodsVO>> getCartGoodsList() {
         Long userId = BaseContext.getCurrentId();
+        // 防止没有登录时获取购物车报错
+        if (userId == null) {
+            return Result.success();
+        }
         List<ShopCart> shopCartList = cartRepository.findAllByUserId(userId);
         List<CartGoodsVO> cartGoodsVOList = shopCartList.stream()
                 .map(shopCart ->
@@ -49,7 +53,7 @@ public class CartServiceImpl implements CartService {
      *
      * @param ids     购物车商品id,可以是多个
      * @param checked 是否选中 可传递可不传递
-     * @param number 商品数量 可传递可不传递
+     * @param number  商品数量 可传递可不传递
      * @return
      */
     public void doCheckedCartGoods(List<Long> ids, Boolean checked, Short number) {
