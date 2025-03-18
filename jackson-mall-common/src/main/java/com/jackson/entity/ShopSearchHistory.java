@@ -2,12 +2,16 @@ package com.jackson.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "shop_search_history")
+@EntityListeners(AuditingEntityListener.class) // 开启springDataJpa审计监听器
 public class ShopSearchHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,15 +25,17 @@ public class ShopSearchHistory {
     private String keyword;
 
     @ColumnDefault("''")
-    @Column(name = "`from`", nullable = false, length = 63)
+    @Column(name = "`from`", length = 63)
     private String from;
 
     @Column(name = "has_goods")
     private Boolean hasGoods;
 
+    @CreatedDate
     @Column(name = "create_time")
     private LocalDateTime createTime;
 
+    @LastModifiedDate
     @Column(name = "update_time")
     private LocalDateTime updateTime;
 

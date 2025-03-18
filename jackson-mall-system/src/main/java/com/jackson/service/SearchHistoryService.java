@@ -1,5 +1,6 @@
 package com.jackson.service;
 
+import com.jackson.dto.AddSearchHistoryDTO;
 import com.jackson.result.Result;
 import com.jackson.vo.SearchHistoryAndKeyWordsVO;
 
@@ -13,4 +14,6 @@ public interface SearchHistoryService {
     Result<SearchHistoryAndKeyWordsVO> getHistoryAndKeywordList();
 
     void deleteAllSearchHistory();
+
+    void addSearchHistory(AddSearchHistoryDTO addSearchHistoryDTO);
 }

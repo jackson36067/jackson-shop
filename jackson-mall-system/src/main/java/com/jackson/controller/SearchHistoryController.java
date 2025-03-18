@@ -1,5 +1,6 @@
 package com.jackson.controller;
 
+import com.jackson.dto.AddSearchHistoryDTO;
 import com.jackson.result.Result;
 import com.jackson.service.SearchHistoryService;
 import com.jackson.vo.SearchHistoryAndKeyWordsVO;
@@ -15,6 +16,7 @@ public class SearchHistoryController {
 
     /**
      * 获取用户搜索历史记录以及热门搜索词
+     *
      * @return
      */
     @GetMapping("/list")
@@ -26,7 +28,17 @@ public class SearchHistoryController {
      * 删除用户所有查询记录
      */
     @DeleteMapping("/delete/all")
-    public void deleteAllSearchHistory(){
+    public void deleteAllSearchHistory() {
         searchHistoryService.deleteAllSearchHistory();
     }
+
+    /**
+     * 新增用户历史查询记录
+     * @param addSearchHistoryDTO
+     */
+    @PostMapping("/add")
+    public void addSearchHistory(@RequestBody AddSearchHistoryDTO addSearchHistoryDTO) {
+        searchHistoryService.addSearchHistory(addSearchHistoryDTO);
+    }
+
 }
