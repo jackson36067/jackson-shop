@@ -17,11 +17,14 @@ public class CartGoodsVO implements Serializable {
     private Boolean checked;
     private String picUrl;
     private String remark;
+    private Long storeId;
+    private String storeName;
+    private Boolean isContainCoupon; // 商家是否给该商品提供优惠卷
 
     public CartGoodsVO() {
     }
 
-    public CartGoodsVO(Long id, Long userId, Long goodsId, String goodsSn, String goodsName, Long productId, BigDecimal price, Short number, String specifications, Boolean checked, String picUrl, String remark) {
+    public CartGoodsVO(Long id, Long userId, Long goodsId, String goodsSn, String goodsName, Long productId, BigDecimal price, Short number, String specifications, Boolean checked, String picUrl, String remark, Long storeId, String storeName, Boolean isContainCoupon) {
         this.id = id;
         this.userId = userId;
         this.goodsId = goodsId;
@@ -34,6 +37,9 @@ public class CartGoodsVO implements Serializable {
         this.checked = checked;
         this.picUrl = picUrl;
         this.remark = remark;
+        this.storeId = storeId;
+        this.storeName = storeName;
+        this.isContainCoupon = isContainCoupon;
     }
 
     public Long getId() {
@@ -132,17 +138,41 @@ public class CartGoodsVO implements Serializable {
         this.remark = remark;
     }
 
+    public String getStoreName() {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName) {
+        this.storeName = storeName;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+
+    public Boolean getIsContainCoupon() {
+        return isContainCoupon;
+    }
+
+    public void setIsContainCoupon(Boolean containCoupon) {
+        isContainCoupon = containCoupon;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CartGoodsVO that = (CartGoodsVO) o;
-        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(goodsId, that.goodsId) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(goodsName, that.goodsName) && Objects.equals(productId, that.productId) && Objects.equals(price, that.price) && Objects.equals(number, that.number) && Objects.equals(specifications, that.specifications) && Objects.equals(checked, that.checked) && Objects.equals(picUrl, that.picUrl) && Objects.equals(remark, that.remark);
+        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(goodsId, that.goodsId) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(goodsName, that.goodsName) && Objects.equals(productId, that.productId) && Objects.equals(price, that.price) && Objects.equals(number, that.number) && Objects.equals(specifications, that.specifications) && Objects.equals(checked, that.checked) && Objects.equals(picUrl, that.picUrl) && Objects.equals(remark, that.remark) && Objects.equals(storeId, that.storeId) && Objects.equals(storeName, that.storeName) && Objects.equals(isContainCoupon, that.isContainCoupon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, goodsId, goodsSn, goodsName, productId, price, number, specifications, checked, picUrl, remark);
+        return Objects.hash(id, userId, goodsId, goodsSn, goodsName, productId, price, number, specifications, checked, picUrl, remark, storeId, storeName, isContainCoupon);
     }
 
     @Override
@@ -160,6 +190,9 @@ public class CartGoodsVO implements Serializable {
                 ", checked=" + checked +
                 ", picUrl='" + picUrl + '\'' +
                 ", remark='" + remark + '\'' +
+                ", storeId=" + storeId +
+                ", storeName='" + storeName + '\'' +
+                ", isContainCoupon=" + isContainCoupon +
                 '}';
     }
 }

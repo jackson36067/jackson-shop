@@ -5,8 +5,11 @@ import cn.hutool.json.JSONUtil;
 import com.jackson.context.BaseContext;
 import com.jackson.entity.ShopCart;
 import com.jackson.entity.ShopCategory;
+import com.jackson.entity.ShopGood;
+import com.jackson.entity.ShopStore;
 import com.jackson.repository.CartRepository;
 import com.jackson.repository.CategoryRepository;
+import com.jackson.repository.GoodsRepository;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
 import com.jackson.vo.CartGoodsVO;
@@ -21,6 +24,8 @@ public class CartServiceImpl implements CartService {
 
     @Resource
     private CartRepository cartRepository;
+    @Resource
+    private GoodsRepository goodsRepository;
 
     /**
      * 获取用户购物车所有商品
@@ -37,10 +42,19 @@ public class CartServiceImpl implements CartService {
         List<CartGoodsVO> cartGoodsVOList = shopCartList.stream()
                 .map(shopCart ->
                         {
+                            // shopCart中冗余了一些商品信息,将信息转换成需要的类型
                             CartGoodsVO cartGoodsVO = BeanUtil.copyProperties(shopCart, CartGoodsVO.class);
+                            // 处理商品规格列表
                             List<String> specificationsList = JSONUtil.toList(shopCart.getSpecifications(), String.class);
                             String specification = String.join(" ", specificationsList);
                             cartGoodsVO.setSpecifications(specification);
+                            // 获取商品的店家
+                            ShopGood shopGood = goodsRepository.findById(shopCart.getGoodsId()).get();
+                            ShopStore shopStore = shopGood.getShopStore();
+                            cartGoodsVO.setStoreId(shopStore.getId());
+                            cartGoodsVO.setStoreName(shopStore.getName());
+                            // 判断店家是否给该商品提供优惠卷
+                            cartGoodsVO.setIsContainCoupon(!shopGood.getShopCouponList().isEmpty());
                             return cartGoodsVO;
                         }
                 )
