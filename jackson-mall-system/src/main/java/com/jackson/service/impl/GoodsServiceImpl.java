@@ -2,8 +2,12 @@ package com.jackson.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.jackson.constant.GoodsConstant;
+import com.jackson.context.BaseContext;
+import com.jackson.dto.MemberCollectGoodsDTO;
 import com.jackson.entity.ShopGood;
+import com.jackson.entity.ShopMemberCollectGood;
 import com.jackson.repository.GoodsRepository;
+import com.jackson.repository.MemberCollectGoodsRepository;
 import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
@@ -26,6 +30,8 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Resource
     private GoodsRepository goodsRepository;
+    @Resource
+    private MemberCollectGoodsRepository memberCollectGoodsRepository;
 
     /**
      * 根据条件获取商品
@@ -123,5 +129,23 @@ public class GoodsServiceImpl implements GoodsService {
                 .toList();
         GoodsPageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new GoodsPageResult<>(goodsMessageVOList, isRemain);
         return Result.success(goodsMessageVOGoodsPageResult);
+    }
+
+    /**
+     * 用户收藏商品或者取消收藏商品
+     * @param memberCollectGoodsDTO
+     */
+    public void doCollectOrCancelCollectGoods(MemberCollectGoodsDTO memberCollectGoodsDTO) {
+        Long userId = BaseContext.getCurrentId();
+        Boolean isCollect = memberCollectGoodsDTO.getIsCollect();
+        // 先判断是否收藏了
+        if(isCollect){
+            // 收藏了 -> 取消收藏
+            memberCollectGoodsRepository.deleteByMemberIdAndGoodsId(userId,memberCollectGoodsDTO.getGoodsId());
+        }else {
+            // 没有收藏
+            ShopMemberCollectGood shopMemberCollectGood = new ShopMemberCollectGood(null, userId, memberCollectGoodsDTO.getGoodsId(), null);
+            memberCollectGoodsRepository.save(shopMemberCollectGood);
+        }
     }
 }

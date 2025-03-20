@@ -2,6 +2,8 @@ package com.jackson.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,6 +11,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "shop_member_collect_goods")
+@EntityListeners(AuditingEntityListener.class)
 public class ShopMemberCollectGood implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +26,7 @@ public class ShopMemberCollectGood implements Serializable {
 
     @ColumnDefault("(now())")
     @Column(name = "create_time", nullable = false)
+    @CreatedDate
     private LocalDateTime createTime;
 
     public ShopMemberCollectGood() {

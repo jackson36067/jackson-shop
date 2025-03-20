@@ -1,5 +1,6 @@
 package com.jackson.controller;
 
+import com.jackson.dto.MemberCollectGoodsDTO;
 import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
@@ -42,5 +43,14 @@ public class GoodsController {
     @GetMapping("/category/{id}")
     public Result<GoodsPageResult<GoodsMessageVO>> getGoodsByCategoryId(@PathVariable Long id, Integer page, Integer pageSize) {
         return goodsService.getGoodsByCategoryId(id, page, pageSize);
+    }
+
+    /**
+     * 用户收藏商品或者取消收藏商品
+     * @param memberCollectGoodsDTO
+     */
+    @PostMapping("/collect")
+    public void doCollectOrCancelCollectGoods(@RequestBody MemberCollectGoodsDTO memberCollectGoodsDTO){
+        goodsService.doCollectOrCancelCollectGoods(memberCollectGoodsDTO);
     }
 }
