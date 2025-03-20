@@ -5,10 +5,7 @@ import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
 import com.jackson.vo.GoodsMessageVO;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/goods")
@@ -20,17 +17,17 @@ public class GoodsController {
     /**
      * 根据条件获取商品
      *
-     * @param type            0.新品 1.热销
-     * @param isAll           时候获取全部商品
-     * @param name            商品名称
-     * @param sortType        排序方式 default-根据sort排序 sales-根据销量排序 price-根据价格排序
-     * @param orderType       排序类型 0.升序 1.降序
-     * @param page            页码
-     * @param pageSize        页码数量
+     * @param type      0.新品 1.热销
+     * @param isAll     时候获取全部商品
+     * @param name      商品名称
+     * @param sortType  排序方式 default-根据sort排序 sales-根据销量排序 price-根据价格排序
+     * @param orderType 排序类型 0.升序 1.降序
+     * @param page      页码
+     * @param pageSize  页码数量
      * @return 商品分页集合
      */
     @GetMapping
-    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, String name, String sortType, Integer orderType, Integer page, Integer pageSize) {
+    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, @RequestParam(required = false) String name, @RequestParam(required = false) String sortType, @RequestParam(required = false) Integer orderType, Integer page, Integer pageSize) {
         return goodsService.getHotOrNewGoods(type, isAll, name, sortType, orderType, page, pageSize);
     }
 

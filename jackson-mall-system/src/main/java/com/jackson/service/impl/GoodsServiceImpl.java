@@ -73,14 +73,14 @@ public class GoodsServiceImpl implements GoodsService {
         } else {
             // 接收排序结果
             // 二者都存在可以一起排序,二者都没有就按照sort排序
-            Sort sort = Sort.by(Sort.Direction.ASC, sortType);
-            if (orderType == 0) {
+            Sort sort = Sort.by(Sort.Direction.ASC, GoodsConstant.SORT_COLUMN);
+            if (orderType != null && orderType == 0) {
                 sort = sortType.equals(GoodsConstant.SORT_TYPE_DEFAULT) ?
                         Sort.by(Sort.Direction.ASC, GoodsConstant.SORT_COLUMN)
                         : sortType.equals(GoodsConstant.SORT_TYPE_SALES) ? Sort.by(Sort.Direction.ASC, GoodsConstant.GOODS_SORT_SALE_NUM) : Sort.by(Sort.Direction.ASC, GoodsConstant.GOODS_SORT_PRICE);
             }
             // 排序方式为default-按照sort排序 sales-按照销量排序 price-按照价格排序
-            if (orderType == 1) {
+            if (orderType != null &&  orderType == 1) {
                 sort = sortType.equals(GoodsConstant.SORT_TYPE_DEFAULT) ?
                         Sort.by(Sort.Direction.DESC, GoodsConstant.SORT_COLUMN)
                         :
