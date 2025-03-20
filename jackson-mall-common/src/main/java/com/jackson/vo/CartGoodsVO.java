@@ -20,11 +20,12 @@ public class CartGoodsVO implements Serializable {
     private Long storeId;
     private String storeName;
     private Boolean isContainCoupon; // 商家是否给该商品提供优惠卷
+    private Boolean isCollect; // 判断用户是否收藏了商品
 
     public CartGoodsVO() {
     }
 
-    public CartGoodsVO(Long id, Long userId, Long goodsId, String goodsSn, String goodsName, Long productId, BigDecimal price, Short number, String specifications, Boolean checked, String picUrl, String remark, Long storeId, String storeName, Boolean isContainCoupon) {
+    public CartGoodsVO(Long id, Long userId, Long goodsId, String goodsSn, String goodsName, Long productId, BigDecimal price, Short number, String specifications, Boolean checked, String picUrl, String remark, Long storeId, String storeName, Boolean isContainCoupon, Boolean isCollect) {
         this.id = id;
         this.userId = userId;
         this.goodsId = goodsId;
@@ -40,6 +41,7 @@ public class CartGoodsVO implements Serializable {
         this.storeId = storeId;
         this.storeName = storeName;
         this.isContainCoupon = isContainCoupon;
+        this.isCollect = isCollect;
     }
 
     public Long getId() {
@@ -162,17 +164,25 @@ public class CartGoodsVO implements Serializable {
         isContainCoupon = containCoupon;
     }
 
+    public Boolean getIsCollect() {
+        return isCollect;
+    }
+
+    public void setIsCollect(Boolean collect) {
+        isCollect = collect;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CartGoodsVO that = (CartGoodsVO) o;
-        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(goodsId, that.goodsId) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(goodsName, that.goodsName) && Objects.equals(productId, that.productId) && Objects.equals(price, that.price) && Objects.equals(number, that.number) && Objects.equals(specifications, that.specifications) && Objects.equals(checked, that.checked) && Objects.equals(picUrl, that.picUrl) && Objects.equals(remark, that.remark) && Objects.equals(storeId, that.storeId) && Objects.equals(storeName, that.storeName) && Objects.equals(isContainCoupon, that.isContainCoupon);
+        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(goodsId, that.goodsId) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(goodsName, that.goodsName) && Objects.equals(productId, that.productId) && Objects.equals(price, that.price) && Objects.equals(number, that.number) && Objects.equals(specifications, that.specifications) && Objects.equals(checked, that.checked) && Objects.equals(picUrl, that.picUrl) && Objects.equals(remark, that.remark) && Objects.equals(storeId, that.storeId) && Objects.equals(storeName, that.storeName) && Objects.equals(isContainCoupon, that.isContainCoupon) && Objects.equals(isCollect, that.isCollect);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, goodsId, goodsSn, goodsName, productId, price, number, specifications, checked, picUrl, remark, storeId, storeName, isContainCoupon);
+        return Objects.hash(id, userId, goodsId, goodsSn, goodsName, productId, price, number, specifications, checked, picUrl, remark, storeId, storeName, isContainCoupon, isCollect);
     }
 
     @Override
@@ -193,6 +203,7 @@ public class CartGoodsVO implements Serializable {
                 ", storeId=" + storeId +
                 ", storeName='" + storeName + '\'' +
                 ", isContainCoupon=" + isContainCoupon +
+                ", isCollect=" + isCollect +
                 '}';
     }
 }

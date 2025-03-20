@@ -6,9 +6,7 @@ import com.jackson.context.BaseContext;
 import com.jackson.entity.ShopCart;
 import com.jackson.entity.ShopGood;
 import com.jackson.entity.ShopStore;
-import com.jackson.repository.CartRepository;
-import com.jackson.repository.CouponRepository;
-import com.jackson.repository.GoodsRepository;
+import com.jackson.repository.*;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
 import com.jackson.vo.CartGoodsVO;
@@ -26,6 +24,10 @@ public class CartServiceImpl implements CartService {
     private GoodsRepository goodsRepository;
     @Resource
     private CouponRepository couponRepository;
+    @Resource
+    private MemberCollectGoodsRepository memberCollectGoodsRepository;
+    @Resource
+    private MemberCouponRepository memberCouponRepository;
 
     /**
      * 获取用户购物车所有商品
@@ -55,6 +57,8 @@ public class CartServiceImpl implements CartService {
                             cartGoodsVO.setStoreName(shopStore.getName());
                             // 判断店家是否提供优惠卷 -> 从优惠卷数据库中判断该店家是否有提供优惠卷
                             cartGoodsVO.setIsContainCoupon(!couponRepository.findAllByShopStoreId(shopGood.getShopStore().getId()).isEmpty());
+                            // 判断用户是否收藏了商品
+                            cartGoodsVO.setIsCollect(memberCollectGoodsRepository.findByMemberIdAndGoodsId(userId, shopCart.getGoodsId()) != null);
                             return cartGoodsVO;
                         }
                 )
@@ -88,6 +92,7 @@ public class CartServiceImpl implements CartService {
 
     /**
      * 根据id移除购物车中的商品
+     *
      * @param id 购物车商品id
      */
     public void removeGoodsFromCart(Long id) {
