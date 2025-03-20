@@ -4,17 +4,15 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.jackson.context.BaseContext;
 import com.jackson.entity.ShopCart;
-import com.jackson.entity.ShopCategory;
 import com.jackson.entity.ShopGood;
 import com.jackson.entity.ShopStore;
 import com.jackson.repository.CartRepository;
-import com.jackson.repository.CategoryRepository;
+import com.jackson.repository.CouponRepository;
 import com.jackson.repository.GoodsRepository;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
 import com.jackson.vo.CartGoodsVO;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +24,8 @@ public class CartServiceImpl implements CartService {
     private CartRepository cartRepository;
     @Resource
     private GoodsRepository goodsRepository;
+    @Resource
+    private CouponRepository couponRepository;
 
     /**
      * 获取用户购物车所有商品
@@ -53,8 +53,8 @@ public class CartServiceImpl implements CartService {
                             ShopStore shopStore = shopGood.getShopStore();
                             cartGoodsVO.setStoreId(shopStore.getId());
                             cartGoodsVO.setStoreName(shopStore.getName());
-                            // 判断店家是否给该商品提供优惠卷
-                            cartGoodsVO.setIsContainCoupon(!shopGood.getShopCouponList().isEmpty());
+                            // 判断店家是否提供优惠卷 -> 从优惠卷数据库中判断该店家是否有提供优惠卷
+                            cartGoodsVO.setIsContainCoupon(!couponRepository.findAllByShopStoreId(shopGood.getShopStore().getId()).isEmpty());
                             return cartGoodsVO;
                         }
                 )
@@ -84,5 +84,13 @@ public class CartServiceImpl implements CartService {
             shopCart.setNumber(number);
             cartRepository.saveAndFlush(shopCart);
         }
+    }
+
+    /**
+     * 根据id移除购物车中的商品
+     * @param id 购物车商品id
+     */
+    public void removeGoodsFromCart(Long id) {
+        cartRepository.deleteById(id);
     }
 }

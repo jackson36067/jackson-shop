@@ -9,4 +9,6 @@ public interface CartService {
     Result<List<CartGoodsVO>> getCartGoodsList();
 
     void doCheckedCartGoods(List<Long> ids, Boolean checked, Short number);
+
+    void removeGoodsFromCart(Long id);
 }

@@ -35,6 +35,15 @@ public class CartController {
      */
     @PutMapping("/update")
     public void doCheckedCartGoods(@RequestBody UpdateGoodsCheckedDTO updateGoodsCheckedDTO) {
-        cartService.doCheckedCartGoods(updateGoodsCheckedDTO.getIds(), updateGoodsCheckedDTO.getChecked(),updateGoodsCheckedDTO.getNumber());
+        cartService.doCheckedCartGoods(updateGoodsCheckedDTO.getIds(), updateGoodsCheckedDTO.getChecked(), updateGoodsCheckedDTO.getNumber());
+    }
+
+    /**
+     * 根据id移除购物车中的商品
+     * @param id 购物车商品id
+     */
+    @DeleteMapping("/{id}")
+    public void doRemoveGoodsFromCart(@PathVariable Long id) {
+        cartService.removeGoodsFromCart(id);
     }
 }

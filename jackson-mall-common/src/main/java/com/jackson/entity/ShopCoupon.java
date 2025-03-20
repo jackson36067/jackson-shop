@@ -62,21 +62,17 @@ public class ShopCoupon {
     @Column(name = "del_flag", nullable = false)
     private Short delFlag;
 
-    @ManyToOne
-    @JoinColumn(name = "goods_id",referencedColumnName = "id")
-    private ShopGood shopGood;
+    @Column(name = "expire_day")
+    private Integer expireDay;
 
-    @ManyToMany
-    @JoinTable(
-            name = "shop_member_coupon",
-            joinColumns = {@JoinColumn(name = "coupon_id",referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "user_id",referencedColumnName = "id")}
-    )
-    private List<ShopMember> shopMembers;
+    @ManyToOne
+    @JoinColumn(name = "store_id",referencedColumnName = "id")
+    private ShopStore shopStore;
+
     public ShopCoupon() {
     }
 
-    public ShopCoupon(Long id, String title, Integer num, Integer receiveNum, Integer discount, Integer min, Short status, Short type, LocalDateTime expireTime, LocalDateTime createTime, String createBy, LocalDateTime updateTime, String updateBy, Short delFlag, ShopGood shopGood, List<ShopMember> shopMembers) {
+    public ShopCoupon(Long id, String title, Integer num, Integer receiveNum, Integer discount, Integer min, Short status, Short type, LocalDateTime expireTime, LocalDateTime createTime, String createBy, LocalDateTime updateTime, String updateBy, Short delFlag, Integer expireDay, ShopStore ShopStore) {
         this.id = id;
         this.title = title;
         this.num = num;
@@ -91,8 +87,8 @@ public class ShopCoupon {
         this.updateTime = updateTime;
         this.updateBy = updateBy;
         this.delFlag = delFlag;
-        this.shopGood = shopGood;
-        this.shopMembers = shopMembers;
+        this.expireDay = expireDay;
+        this.shopStore = ShopStore;
     }
 
     public Short getStatus() {
@@ -207,20 +203,20 @@ public class ShopCoupon {
         this.delFlag = delFlag;
     }
 
-    public ShopGood getShopGood() {
-        return shopGood;
+    public ShopStore getShopStore() {
+        return shopStore;
     }
 
-    public void setShopGood(ShopGood shopGood) {
-        this.shopGood = shopGood;
+    public void setShopStore(ShopStore shopStore) {
+        this.shopStore = shopStore;
     }
 
-    public List<ShopMember> getShopMembers() {
-        return shopMembers;
+    public Integer getExpireDay() {
+        return expireDay;
     }
 
-    public void setShopMembers(List<ShopMember> shopMembers) {
-        this.shopMembers = shopMembers;
+    public void setExpireDay(Integer expireDay) {
+        this.expireDay = expireDay;
     }
 
     @Override
@@ -228,12 +224,12 @@ public class ShopCoupon {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopCoupon that = (ShopCoupon) o;
-        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(num, that.num) && Objects.equals(receiveNum, that.receiveNum) && Objects.equals(discount, that.discount) && Objects.equals(min, that.min) && Objects.equals(status, that.status) && Objects.equals(type, that.type) && Objects.equals(expireTime, that.expireTime) && Objects.equals(createTime, that.createTime) && Objects.equals(createBy, that.createBy) && Objects.equals(updateTime, that.updateTime) && Objects.equals(updateBy, that.updateBy) && Objects.equals(delFlag, that.delFlag) && Objects.equals(shopGood, that.shopGood) && Objects.equals(shopMembers, that.shopMembers);
+        return Objects.equals(id, that.id) && Objects.equals(title, that.title) && Objects.equals(num, that.num) && Objects.equals(receiveNum, that.receiveNum) && Objects.equals(discount, that.discount) && Objects.equals(min, that.min) && Objects.equals(status, that.status) && Objects.equals(type, that.type) && Objects.equals(expireTime, that.expireTime) && Objects.equals(createTime, that.createTime) && Objects.equals(createBy, that.createBy) && Objects.equals(updateTime, that.updateTime) && Objects.equals(updateBy, that.updateBy) && Objects.equals(delFlag, that.delFlag) && Objects.equals(expireDay, that.expireDay) && Objects.equals(shopStore, that.shopStore);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, num, receiveNum, discount, min, status, type, expireTime, createTime, createBy, updateTime, updateBy, delFlag, shopGood, shopMembers);
+        return Objects.hash(id, title, num, receiveNum, discount, min, status, type, expireTime, createTime, createBy, updateTime, updateBy, delFlag, expireDay, shopStore);
     }
 
     @Override
@@ -253,8 +249,8 @@ public class ShopCoupon {
                 ", updateTime=" + updateTime +
                 ", updateBy='" + updateBy + '\'' +
                 ", delFlag=" + delFlag +
-                ", shopGood=" + shopGood +
-                ", shopMembers=" + shopMembers +
+                ", expireDay=" + expireDay +
+                ", shopGood=" + shopStore +
                 '}';
     }
 }

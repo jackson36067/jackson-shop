@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface CartRepository extends JpaRepository<ShopCart, Long> {
+    @Query("select s from ShopCart s where s.userId = :userId order by s.createTime desc")
     List<ShopCart> findAllByUserId(Long userId);
 
     @Transactional

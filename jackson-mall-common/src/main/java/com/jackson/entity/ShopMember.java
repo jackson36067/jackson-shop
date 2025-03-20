@@ -67,13 +67,12 @@ public class ShopMember {
     @Column(name = "del_flag")
     private Boolean delFlag;
 
-    @ManyToMany(mappedBy = "shopMembers")
-    private List<ShopCoupon> shopCouponList;
+
 
     public ShopMember() {
     }
 
-    public ShopMember(Long id, String password, Short gender, LocalDate birthday, String email, LocalDateTime lastLoginTime, String lastLoginIp, Short userLevel, String nickname, String mobile, String avatar, Short status, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopCoupon> shopCouponList) {
+    public ShopMember(Long id, String password, Short gender, LocalDate birthday, String email, LocalDateTime lastLoginTime, String lastLoginIp, Short userLevel, String nickname, String mobile, String avatar, Short status, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag) {
         this.id = id;
         this.password = password;
         this.gender = gender;
@@ -89,7 +88,6 @@ public class ShopMember {
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.delFlag = delFlag;
-        this.shopCouponList = shopCouponList;
     }
 
     public Long getId() {
@@ -212,25 +210,17 @@ public class ShopMember {
         this.delFlag = delFlag;
     }
 
-    public List<ShopCoupon> getShopCouponList() {
-        return shopCouponList;
-    }
-
-    public void setShopCouponList(List<ShopCoupon> shopCouponList) {
-        this.shopCouponList = shopCouponList;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopMember that = (ShopMember) o;
-        return Objects.equals(id, that.id) && Objects.equals(password, that.password) && Objects.equals(gender, that.gender) && Objects.equals(birthday, that.birthday) && Objects.equals(email, that.email) && Objects.equals(lastLoginTime, that.lastLoginTime) && Objects.equals(lastLoginIp, that.lastLoginIp) && Objects.equals(userLevel, that.userLevel) && Objects.equals(nickname, that.nickname) && Objects.equals(mobile, that.mobile) && Objects.equals(avatar, that.avatar) && Objects.equals(status, that.status) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag) && Objects.equals(shopCouponList, that.shopCouponList);
+        return Objects.equals(id, that.id) && Objects.equals(password, that.password) && Objects.equals(gender, that.gender) && Objects.equals(birthday, that.birthday) && Objects.equals(email, that.email) && Objects.equals(lastLoginTime, that.lastLoginTime) && Objects.equals(lastLoginIp, that.lastLoginIp) && Objects.equals(userLevel, that.userLevel) && Objects.equals(nickname, that.nickname) && Objects.equals(mobile, that.mobile) && Objects.equals(avatar, that.avatar) && Objects.equals(status, that.status) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, password, gender, birthday, email, lastLoginTime, lastLoginIp, userLevel, nickname, mobile, avatar, status, createTime, updateTime, delFlag, shopCouponList);
+        return Objects.hash(id, password, gender, birthday, email, lastLoginTime, lastLoginIp, userLevel, nickname, mobile, avatar, status, createTime, updateTime, delFlag);
     }
 
     @Override
@@ -251,7 +241,6 @@ public class ShopMember {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", delFlag=" + delFlag +
-                ", shopCouponList=" + shopCouponList +
                 '}';
     }
 }

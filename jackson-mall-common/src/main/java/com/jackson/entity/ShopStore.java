@@ -37,16 +37,20 @@ public class ShopStore {
     @OneToMany(mappedBy = "shopStore")
     private List<ShopGood> shopGoodList;
 
+    @OneToMany(mappedBy = "shopStore")
+    private List<ShopCoupon> shopCouponList;
+
     public ShopStore() {
     }
 
-    public ShopStore(Long id, String name, Short status, LocalDateTime createTime, LocalDateTime updateTime, List<ShopGood> shopGoodList) {
+    public ShopStore(Long id, String name, Short status, LocalDateTime createTime, LocalDateTime updateTime, List<ShopGood> shopGoodList,List<ShopCoupon> shopCouponList) {
         this.id = id;
         this.name = name;
         this.status = status;
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.shopGoodList = shopGoodList;
+        this.shopCouponList = shopCouponList;
     }
 
     public Long getId() {
@@ -97,17 +101,25 @@ public class ShopStore {
         this.shopGoodList = shopGoodList;
     }
 
+    public List<ShopCoupon> getShopCouponList() {
+        return shopCouponList;
+    }
+
+    public void setShopCouponList(List<ShopCoupon> shopCouponList) {
+        this.shopCouponList = shopCouponList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopStore shopStore = (ShopStore) o;
-        return Objects.equals(id, shopStore.id) && Objects.equals(name, shopStore.name) && Objects.equals(status, shopStore.status) && Objects.equals(createTime, shopStore.createTime) && Objects.equals(updateTime, shopStore.updateTime) && Objects.equals(shopGoodList, shopStore.shopGoodList);
+        return Objects.equals(id, shopStore.id) && Objects.equals(name, shopStore.name) && Objects.equals(status, shopStore.status) && Objects.equals(createTime, shopStore.createTime) && Objects.equals(updateTime, shopStore.updateTime) && Objects.equals(shopGoodList, shopStore.shopGoodList) && Objects.equals(shopCouponList, shopStore.shopCouponList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, status, createTime, updateTime, shopGoodList);
+        return Objects.hash(id, name, status, createTime, updateTime, shopGoodList, shopCouponList);
     }
 
     @Override
@@ -119,6 +131,7 @@ public class ShopStore {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", shopGoodList=" + shopGoodList +
+                ", shopCouponList=" + shopCouponList +
                 '}';
     }
 }

@@ -110,13 +110,10 @@ public class ShopGood implements Serializable {
     @JoinColumn(name = "store_id",referencedColumnName = "id")
     private ShopStore shopStore;
 
-    @OneToMany(mappedBy = "shopGood")
-    private List<ShopCoupon> shopCouponList;
-
     public ShopGood() {
     }
 
-    public ShopGood(Long id, String goodsSn, String name, ShopCategory shopCategory, Long brandId, String gallery, String keywords, String brief, Boolean isOnSale, Integer sort, String picUrl, String shareUrl, Boolean isNew, Boolean isHot, String unit, BigDecimal counterPrice, BigDecimal retailPrice, Integer actualSales, Integer virtualSales, String detail, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopColumn> shopColumnList, List<ShopChannel> shopChannels, ShopStore shopStore, List<ShopCoupon> shopCouponList) {
+    public ShopGood(Long id, String goodsSn, String name, ShopCategory shopCategory, Long brandId, String gallery, String keywords, String brief, Boolean isOnSale, Integer sort, String picUrl, String shareUrl, Boolean isNew, Boolean isHot, String unit, BigDecimal counterPrice, BigDecimal retailPrice, Integer actualSales, Integer virtualSales, String detail, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopColumn> shopColumnList, List<ShopChannel> shopChannels, ShopStore shopStore) {
         this.id = id;
         this.goodsSn = goodsSn;
         this.name = name;
@@ -143,7 +140,6 @@ public class ShopGood implements Serializable {
         this.shopColumnList = shopColumnList;
         this.shopChannels = shopChannels;
         this.shopStore = shopStore;
-        this.shopCouponList = shopCouponList;
     }
 
     public Long getId() {
@@ -354,25 +350,17 @@ public class ShopGood implements Serializable {
         this.shopStore = shopStore;
     }
 
-    public List<ShopCoupon> getShopCouponList() {
-        return shopCouponList;
-    }
-
-    public void setShopCouponList(List<ShopCoupon> shopCouponList) {
-        this.shopCouponList = shopCouponList;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopGood shopGood = (ShopGood) o;
-        return Objects.equals(id, shopGood.id) && Objects.equals(goodsSn, shopGood.goodsSn) && Objects.equals(name, shopGood.name) && Objects.equals(shopCategory, shopGood.shopCategory) && Objects.equals(brandId, shopGood.brandId) && Objects.equals(gallery, shopGood.gallery) && Objects.equals(keywords, shopGood.keywords) && Objects.equals(brief, shopGood.brief) && Objects.equals(isOnSale, shopGood.isOnSale) && Objects.equals(sort, shopGood.sort) && Objects.equals(picUrl, shopGood.picUrl) && Objects.equals(shareUrl, shopGood.shareUrl) && Objects.equals(isNew, shopGood.isNew) && Objects.equals(isHot, shopGood.isHot) && Objects.equals(unit, shopGood.unit) && Objects.equals(counterPrice, shopGood.counterPrice) && Objects.equals(retailPrice, shopGood.retailPrice) && Objects.equals(actualSales, shopGood.actualSales) && Objects.equals(virtualSales, shopGood.virtualSales) && Objects.equals(detail, shopGood.detail) && Objects.equals(createTime, shopGood.createTime) && Objects.equals(updateTime, shopGood.updateTime) && Objects.equals(delFlag, shopGood.delFlag) && Objects.equals(shopColumnList, shopGood.shopColumnList) && Objects.equals(shopChannels, shopGood.shopChannels) && Objects.equals(shopStore, shopGood.shopStore) && Objects.equals(shopCouponList, shopGood.shopCouponList);
+        return Objects.equals(id, shopGood.id) && Objects.equals(goodsSn, shopGood.goodsSn) && Objects.equals(name, shopGood.name) && Objects.equals(shopCategory, shopGood.shopCategory) && Objects.equals(brandId, shopGood.brandId) && Objects.equals(gallery, shopGood.gallery) && Objects.equals(keywords, shopGood.keywords) && Objects.equals(brief, shopGood.brief) && Objects.equals(isOnSale, shopGood.isOnSale) && Objects.equals(sort, shopGood.sort) && Objects.equals(picUrl, shopGood.picUrl) && Objects.equals(shareUrl, shopGood.shareUrl) && Objects.equals(isNew, shopGood.isNew) && Objects.equals(isHot, shopGood.isHot) && Objects.equals(unit, shopGood.unit) && Objects.equals(counterPrice, shopGood.counterPrice) && Objects.equals(retailPrice, shopGood.retailPrice) && Objects.equals(actualSales, shopGood.actualSales) && Objects.equals(virtualSales, shopGood.virtualSales) && Objects.equals(detail, shopGood.detail) && Objects.equals(createTime, shopGood.createTime) && Objects.equals(updateTime, shopGood.updateTime) && Objects.equals(delFlag, shopGood.delFlag) && Objects.equals(shopColumnList, shopGood.shopColumnList) && Objects.equals(shopChannels, shopGood.shopChannels) && Objects.equals(shopStore, shopGood.shopStore);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, goodsSn, name, shopCategory, brandId, gallery, keywords, brief, isOnSale, sort, picUrl, shareUrl, isNew, isHot, unit, counterPrice, retailPrice, actualSales, virtualSales, detail, createTime, updateTime, delFlag, shopColumnList, shopChannels, shopStore, shopCouponList);
+        return Objects.hash(id, goodsSn, name, shopCategory, brandId, gallery, keywords, brief, isOnSale, sort, picUrl, shareUrl, isNew, isHot, unit, counterPrice, retailPrice, actualSales, virtualSales, detail, createTime, updateTime, delFlag, shopColumnList, shopChannels, shopStore);
     }
 
     @Override
@@ -404,7 +392,6 @@ public class ShopGood implements Serializable {
                 ", shopColumnList=" + shopColumnList +
                 ", shopChannels=" + shopChannels +
                 ", shopStore=" + shopStore +
-                ", shopCouponList=" + shopCouponList +
                 '}';
     }
 }
