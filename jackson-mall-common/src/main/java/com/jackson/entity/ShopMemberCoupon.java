@@ -61,10 +61,13 @@ public class ShopMemberCoupon {
     @Column(name = "del_flag")
     private Short delFlag;
 
+    @Column(name= "store_id")
+    private Long storeId;
+
     public ShopMemberCoupon() {
     }
 
-    public ShopMemberCoupon(Long id, Long userId, String title, Long couponId, Integer discount, Integer min, LocalDateTime expireTime, Short useStatus, LocalDateTime usedTime, Long orderId, LocalDateTime createTime, LocalDateTime updateTime, Short delFlag) {
+    public ShopMemberCoupon(Long id, Long userId, String title, Long couponId, Integer discount, Integer min, LocalDateTime expireTime, Short useStatus, LocalDateTime usedTime, Long orderId, LocalDateTime createTime, LocalDateTime updateTime, Short delFlag, Long storeId) {
         this.id = id;
         this.userId = userId;
         this.title = title;
@@ -78,6 +81,7 @@ public class ShopMemberCoupon {
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.delFlag = delFlag;
+        this.storeId = storeId;
     }
 
     public Long getId() {
@@ -184,17 +188,24 @@ public class ShopMemberCoupon {
         this.delFlag = delFlag;
     }
 
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopMemberCoupon that = (ShopMemberCoupon) o;
-        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(title, that.title) && Objects.equals(couponId, that.couponId) && Objects.equals(discount, that.discount) && Objects.equals(min, that.min) && Objects.equals(expireTime, that.expireTime) && Objects.equals(useStatus, that.useStatus) && Objects.equals(usedTime, that.usedTime) && Objects.equals(orderId, that.orderId) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag);
+        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(title, that.title) && Objects.equals(couponId, that.couponId) && Objects.equals(discount, that.discount) && Objects.equals(min, that.min) && Objects.equals(expireTime, that.expireTime) && Objects.equals(useStatus, that.useStatus) && Objects.equals(usedTime, that.usedTime) && Objects.equals(orderId, that.orderId) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag) && Objects.equals(storeId, that.storeId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, title, couponId, discount, min, expireTime, useStatus, usedTime, orderId, createTime, updateTime, delFlag);
+        return Objects.hash(id, userId, title, couponId, discount, min, expireTime, useStatus, usedTime, orderId, createTime, updateTime, delFlag, storeId);
     }
 
     @Override
@@ -213,6 +224,7 @@ public class ShopMemberCoupon {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", delFlag=" + delFlag +
+                ", storeId=" + storeId +
                 '}';
     }
 }
