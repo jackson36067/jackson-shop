@@ -23,13 +23,14 @@ public class GoodsController {
      * @param name      商品名称
      * @param sortType  排序方式 default-根据sort排序 sales-根据销量排序 price-根据价格排序
      * @param orderType 排序类型 0.升序 1.降序
+     * @param storeId   店铺id
      * @param page      页码
      * @param pageSize  页码数量
      * @return 商品分页集合
      */
     @GetMapping
-    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, @RequestParam(required = false) String name, @RequestParam(required = false) String sortType, @RequestParam(required = false) Integer orderType, Integer page, Integer pageSize) {
-        return goodsService.getHotOrNewGoods(type, isAll, name, sortType, orderType, page, pageSize);
+    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, @RequestParam(required = false) String name, @RequestParam(required = false) String sortType, @RequestParam(required = false) Integer orderType, @RequestParam(required = false) Long storeId, Integer page, Integer pageSize) {
+        return goodsService.getHotOrNewGoods(type, isAll, name, sortType, orderType, storeId, page, pageSize);
     }
 
     /**
@@ -47,10 +48,11 @@ public class GoodsController {
 
     /**
      * 用户收藏商品或者取消收藏商品
+     *
      * @param memberCollectGoodsDTO
      */
     @PostMapping("/collect")
-    public void doCollectOrCancelCollectGoods(@RequestBody MemberCollectGoodsDTO memberCollectGoodsDTO){
+    public void doCollectOrCancelCollectGoods(@RequestBody MemberCollectGoodsDTO memberCollectGoodsDTO) {
         goodsService.doCollectOrCancelCollectGoods(memberCollectGoodsDTO);
     }
 }

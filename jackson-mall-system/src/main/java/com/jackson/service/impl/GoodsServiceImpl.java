@@ -2,6 +2,7 @@ package com.jackson.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.jackson.constant.GoodsConstant;
+import com.jackson.constant.StoreConstant;
 import com.jackson.context.BaseContext;
 import com.jackson.dto.MemberCollectGoodsDTO;
 import com.jackson.entity.ShopGood;
@@ -41,15 +42,17 @@ public class GoodsServiceImpl implements GoodsService {
      * @param name      商品名称
      * @param sortType  排序方式 default-根据sort排序 sales-根据销量排序 price-根据价格排序
      * @param orderType 排序类型 0.升序 1.降序
+     * @param storeId   店铺id
      * @param page      页码
      * @param pageSize  页码数量
      * @return 商品分页集合
      */
-    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, String name, String sortType, Integer orderType, Integer page, Integer pageSize) {
+    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, String name, String sortType, Integer orderType, Long storeId, Integer page, Integer pageSize) {
         // 封装可变条件 -> 判断条件是获取最新还是热销商品
         Specification<ShopGood> shopGoodSpecification = (root, query, cb) -> {
             // 用于暂时存放查询条件,存放到查询条件List中
             ArrayList<Predicate> predicateList = new ArrayList<>();
+            // 判断获取的是新品还是热销产品 -> 封装条件
             if (type == 1) {
                 Predicate isHot = cb.equal(root.get(GoodsConstant.IS_HOT), true);
                 predicateList.add(isHot);
@@ -57,9 +60,15 @@ public class GoodsServiceImpl implements GoodsService {
                 Predicate isNew = cb.equal(root.get(GoodsConstant.IS_NEW), true);
                 predicateList.add(isNew);
             }
+            // 封装商品名称条件
             if (!StringUtil.isNullOrEmpty(name)) {
                 Predicate namePredicate = cb.like(root.get(GoodsConstant.NAME), "%" + name + "%");
                 predicateList.add(namePredicate);
+            }
+            // 封装店铺条件
+            if (storeId != null) {
+                Predicate storeIdCondition = cb.equal(root.get(GoodsConstant.SHOP_STORE).get(StoreConstant.ID), storeId);
+                predicateList.add(storeIdCondition);
             }
             Predicate[] predicates = new Predicate[predicateList.size()];
             // 将所有条件连接起来
@@ -86,7 +95,7 @@ public class GoodsServiceImpl implements GoodsService {
                         : sortType.equals(GoodsConstant.SORT_TYPE_SALES) ? Sort.by(Sort.Direction.ASC, GoodsConstant.GOODS_SORT_SALE_NUM) : Sort.by(Sort.Direction.ASC, GoodsConstant.GOODS_SORT_PRICE);
             }
             // 排序方式为default-按照sort排序 sales-按照销量排序 price-按照价格排序
-            if (orderType != null &&  orderType == 1) {
+            if (orderType != null && orderType == 1) {
                 sort = sortType.equals(GoodsConstant.SORT_TYPE_DEFAULT) ?
                         Sort.by(Sort.Direction.DESC, GoodsConstant.SORT_COLUMN)
                         :
@@ -133,16 +142,17 @@ public class GoodsServiceImpl implements GoodsService {
 
     /**
      * 用户收藏商品或者取消收藏商品
+     *
      * @param memberCollectGoodsDTO
      */
     public void doCollectOrCancelCollectGoods(MemberCollectGoodsDTO memberCollectGoodsDTO) {
         Long userId = BaseContext.getCurrentId();
         Boolean isCollect = memberCollectGoodsDTO.getIsCollect();
         // 先判断是否收藏了
-        if(isCollect){
+        if (isCollect) {
             // 收藏了 -> 取消收藏
-            memberCollectGoodsRepository.deleteByMemberIdAndGoodsId(userId,memberCollectGoodsDTO.getGoodsId());
-        }else {
+            memberCollectGoodsRepository.deleteByMemberIdAndGoodsId(userId, memberCollectGoodsDTO.getGoodsId());
+        } else {
             // 没有收藏
             ShopMemberCollectGood shopMemberCollectGood = new ShopMemberCollectGood(null, userId, memberCollectGoodsDTO.getGoodsId(), null);
             memberCollectGoodsRepository.save(shopMemberCollectGood);
