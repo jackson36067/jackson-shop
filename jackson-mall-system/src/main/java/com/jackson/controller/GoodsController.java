@@ -4,9 +4,12 @@ import com.jackson.dto.MemberCollectGoodsDTO;
 import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
+import com.jackson.vo.CollectGoodsVO;
 import com.jackson.vo.GoodsMessageVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/goods")
@@ -54,5 +57,18 @@ public class GoodsController {
     @PostMapping("/collect")
     public void doCollectOrCancelCollectGoods(@RequestBody MemberCollectGoodsDTO memberCollectGoodsDTO) {
         goodsService.doCollectOrCancelCollectGoods(memberCollectGoodsDTO);
+    }
+
+    /**
+     * 获取用户收藏商品列表
+     *
+     * @param name        商品名称
+     * @param sortType    排序类型 0.根据收藏时间升序排序 1.根据收藏时间降序排序
+     * @param collectTime 获取收藏商品天数范围 比如: 一周前, 一天前, 一个月前
+     * @return List<CollectGoodsVO>
+     */
+    @GetMapping("/collect/list")
+    public Result<List<CollectGoodsVO>> getCollectGoodsList(@RequestParam(required = false) String name, @RequestParam(required = false) Integer sortType, @RequestParam(required = false) Integer collectTime) {
+        return goodsService.getCollectGoodsList(name, sortType, collectTime);
     }
 }

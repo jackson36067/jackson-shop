@@ -36,6 +36,6 @@ public class GlobalExceptionHandler {
         e.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR) // 返回 500 状态码
-                .body(Result.error("服务器内部错误"));
+                .body(Result.error(e.getMessage()));
     }
 }

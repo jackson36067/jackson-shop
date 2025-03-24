@@ -24,6 +24,9 @@ public class ShopMemberCollectGood implements Serializable {
     @Column(name = "goods_id", nullable = false)
     private Long goodsId;
 
+    @Column(name = "goods_name")
+    private String goodsName;
+
     @ColumnDefault("(now())")
     @Column(name = "create_time", nullable = false)
     @CreatedDate
@@ -32,10 +35,11 @@ public class ShopMemberCollectGood implements Serializable {
     public ShopMemberCollectGood() {
     }
 
-    public ShopMemberCollectGood(Long id, Long memberId, Long goodsId, LocalDateTime createTime) {
+    public ShopMemberCollectGood(Long id, Long memberId, Long goodsId,String goodsName, LocalDateTime createTime) {
         this.id = id;
         this.memberId = memberId;
         this.goodsId = goodsId;
+        this.goodsName = goodsName;
         this.createTime = createTime;
     }
 
@@ -63,6 +67,14 @@ public class ShopMemberCollectGood implements Serializable {
         this.goodsId = goodsId;
     }
 
+    public String getGoodsName() {
+        return goodsName;
+    }
+
+    public void setGoodsName(String goodsName) {
+        this.goodsName = goodsName;
+    }
+
     public LocalDateTime getCreateTime() {
         return createTime;
     }
@@ -73,15 +85,14 @@ public class ShopMemberCollectGood implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopMemberCollectGood that = (ShopMemberCollectGood) o;
-        return Objects.equals(id, that.id) && Objects.equals(memberId, that.memberId) && Objects.equals(goodsId, that.goodsId) && Objects.equals(createTime, that.createTime);
+        return Objects.equals(id, that.id) && Objects.equals(memberId, that.memberId) && Objects.equals(goodsId, that.goodsId) && Objects.equals(goodsName, that.goodsName) && Objects.equals(createTime, that.createTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, memberId, goodsId, createTime);
+        return Objects.hash(id, memberId, goodsId, goodsName, createTime);
     }
 
     @Override
@@ -90,6 +101,7 @@ public class ShopMemberCollectGood implements Serializable {
                 "id=" + id +
                 ", memberId=" + memberId +
                 ", goodsId=" + goodsId +
+                ", goodsName='" + goodsName + '\'' +
                 ", createTime=" + createTime +
                 '}';
     }

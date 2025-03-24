@@ -7,24 +7,30 @@ import com.jackson.context.BaseContext;
 import com.jackson.dto.MemberCollectGoodsDTO;
 import com.jackson.entity.ShopGood;
 import com.jackson.entity.ShopMemberCollectGood;
+import com.jackson.entity.ShopStore;
 import com.jackson.repository.GoodsRepository;
 import com.jackson.repository.MemberCollectGoodsRepository;
 import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
+import com.jackson.vo.CollectGoodsVO;
 import com.jackson.vo.GoodsMessageVO;
 import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
+import jakarta.persistence.Id;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class GoodsServiceImpl implements GoodsService {
@@ -148,14 +154,79 @@ public class GoodsServiceImpl implements GoodsService {
     public void doCollectOrCancelCollectGoods(MemberCollectGoodsDTO memberCollectGoodsDTO) {
         Long userId = BaseContext.getCurrentId();
         Boolean isCollect = memberCollectGoodsDTO.getIsCollect();
+        // 判断删除方式 -> 如果idList有值,那么就是删除用户收藏商品信息, 如果是否收藏有值,那么就是单个进行收藏或者取消收藏
+        List<Long> idList = memberCollectGoodsDTO.getIdList();
+        if (idList != null && !idList.isEmpty()) {
+            memberCollectGoodsRepository.deleteAllByIdInBatch(idList);
+        }
         // 先判断是否收藏了
-        if (isCollect) {
+        if (isCollect != null && isCollect) {
             // 收藏了 -> 取消收藏
             memberCollectGoodsRepository.deleteByMemberIdAndGoodsId(userId, memberCollectGoodsDTO.getGoodsId());
-        } else {
+        } else if (isCollect != null) {
             // 没有收藏
-            ShopMemberCollectGood shopMemberCollectGood = new ShopMemberCollectGood(null, userId, memberCollectGoodsDTO.getGoodsId(), null);
+            ShopMemberCollectGood shopMemberCollectGood = new ShopMemberCollectGood(null, userId, memberCollectGoodsDTO.getGoodsId(), memberCollectGoodsDTO.getGoodsName(), null);
             memberCollectGoodsRepository.save(shopMemberCollectGood);
         }
+    }
+
+    /**
+     * 获取用户收藏商品列表
+     *
+     * @param name        商品名称
+     * @param sortType    排序类型 0.根据收藏时间升序排序 1.根据收藏时间降序排序
+     * @param collectTime 获取收藏商品天数范围 比如: 一周前, 一天前, 一个月前
+     * @return List<CollectGoodsVO>
+     */
+    public Result<List<CollectGoodsVO>> getCollectGoodsList(String name, Integer sortType, Integer collectTime) {
+        Long userId = BaseContext.getCurrentId();
+        if (userId == null) {
+            return Result.success(new ArrayList<>());
+        }
+        Specification<ShopMemberCollectGood> shopMemberCollectGoodSpecification = (root, query, cb) -> {
+            // 用于暂时存放查询条件,存放到查询条件List中
+            ArrayList<Predicate> predicateList = new ArrayList<>();
+            if (collectTime != null) {
+                // 根据传递天数获取距离当前时间collectTime的时间
+                LocalDateTime pastTime = LocalDateTime.now().minusDays(collectTime);
+                // 添加时间范围
+                Predicate collectTimeCondition = cb.greaterThan(root.get(GoodsConstant.COLLECT_TIME), pastTime);
+                predicateList.add(collectTimeCondition);
+            }
+            if(!StringUtil.isNullOrEmpty(name)) {
+                // 添加商品名称范围
+                Predicate nameCondition = cb.like(root.get(GoodsConstant.GOODS_NAME), "%" + name + "%");
+                predicateList.add(nameCondition);
+            }
+            Predicate memberCondition = cb.equal(root.get(GoodsConstant.MEMBER_ID), userId);
+            predicateList.add(memberCondition);
+            Predicate[] predicates = new Predicate[predicateList.size()];
+            return cb.and(predicateList.toArray(predicates));
+        };
+        List<ShopMemberCollectGood> shopMemberCollectGoodList;
+        if (sortType != null) {
+            // 判断排序类型
+            Sort sort = Sort.by(sortType == 0 ? Sort.Direction.ASC : Sort.Direction.DESC, GoodsConstant.COLLECT_TIME);
+            shopMemberCollectGoodList = memberCollectGoodsRepository.findAll(shopMemberCollectGoodSpecification, sort);
+        } else {
+            shopMemberCollectGoodList = memberCollectGoodsRepository.findAll(shopMemberCollectGoodSpecification);
+        }
+        List<CollectGoodsVO> collectGoodsVOList = shopMemberCollectGoodList
+                .stream()
+                .map(shopMemberCollectGood -> {
+                    CollectGoodsVO collectGoodsVO = BeanUtil.copyProperties(shopMemberCollectGood, CollectGoodsVO.class);
+                    ShopGood shopGood = goodsRepository.findById(shopMemberCollectGood.getGoodsId()).get();
+                    collectGoodsVO.setName(shopGood.getName());
+                    collectGoodsVO.setPicUrl(shopGood.getPicUrl());
+                    collectGoodsVO.setPrice(shopGood.getRetailPrice());
+                    ShopStore shopStore = shopGood.getShopStore();
+                    collectGoodsVO.setStoreId(shopStore.getId());
+                    collectGoodsVO.setStoreName(shopStore.getName());
+                    Integer collectNumber = memberCollectGoodsRepository.countByGoodsId(shopMemberCollectGood.getGoodsId());
+                    collectGoodsVO.setCollectNumber(collectNumber);
+                    return collectGoodsVO;
+                })
+                .toList();
+        return Result.success(collectGoodsVOList);
     }
 }

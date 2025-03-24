@@ -10,4 +10,7 @@ public class GoodsConstant {
     public static final String SORT_TYPE_DEFAULT = "default"; // 价格排序
     public static final String SORT_TYPE_SALES= "sales"; // 价格排序
     public  static final String SHOP_STORE = "shopStore";
+    public  static final String MEMBER_ID = "memberId";
+    public  static final String COLLECT_TIME = "createTime";
+    public  static final String GOODS_NAME = "goodsName";
 }
