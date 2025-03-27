@@ -27,4 +27,6 @@ public interface MemberCouponRepository extends JpaRepository<ShopMemberCoupon, 
     @Transactional
     @Query("UPDATE ShopMemberCoupon s SET s.delFlag = :delFlag WHERE s.id IN (:ids)")
     void updateDelFlagByIds(@Param("ids") List<Long> ids, @Param("delFlag") Short delFlag);
+
+    ShopMemberCoupon findByUserIdAndCouponId(Long userId, Long couponId);
 }

@@ -3,9 +3,7 @@ package com.jackson.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.jackson.context.BaseContext;
-import com.jackson.entity.ShopCart;
-import com.jackson.entity.ShopGood;
-import com.jackson.entity.ShopStore;
+import com.jackson.entity.*;
 import com.jackson.repository.*;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
@@ -14,6 +12,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -55,8 +54,19 @@ public class CartServiceImpl implements CartService {
                             ShopStore shopStore = shopGood.getShopStore();
                             cartGoodsVO.setStoreId(shopStore.getId());
                             cartGoodsVO.setStoreName(shopStore.getName());
-                            // 判断店家是否提供优惠卷 -> 从优惠卷数据库中判断该店家是否有提供优惠卷
-                            cartGoodsVO.setIsContainCoupon(!couponRepository.findAllByShopStoreId(shopGood.getShopStore().getId()).isEmpty());
+                            // 判断店家是否提供优惠卷 -> 从优惠卷数据库中判断该店家是否有提供优惠卷以及这些优惠卷用户是否已经领取
+                            List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStoreId(shopGood.getShopStore().getId());
+                            // 用户是否有可领取的优惠卷
+                            AtomicBoolean isUserGet = new AtomicBoolean(false);
+                            // 判断用户是否有领取优惠卷 -> 只要有一个没有领取就设置为true
+                            for (ShopCoupon shopCoupon : shopCouponList) {
+                                ShopMemberCoupon shopMemberCoupon = memberCouponRepository.findByUserIdAndCouponId(userId, shopCoupon.getId());
+                                if (shopMemberCoupon == null) {
+                                    isUserGet.set(true);
+                                    break;
+                                }
+                            }
+                            cartGoodsVO.setIsContainCoupon(!shopCouponList.isEmpty() && isUserGet.get());
                             // 判断用户是否收藏了商品
                             cartGoodsVO.setIsCollect(memberCollectGoodsRepository.findByMemberIdAndGoodsId(userId, shopCart.getGoodsId()) != null);
                             return cartGoodsVO;

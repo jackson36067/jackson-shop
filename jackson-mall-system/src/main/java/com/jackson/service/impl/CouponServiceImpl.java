@@ -34,7 +34,7 @@ public class CouponServiceImpl implements CouponService {
     private MemberCouponRepository memberCouponRepository;
     @Resource
     private RabbitTemplate rabbitTemplate;
-    @Autowired
+    @Resource
     private StoreRepository storeRepository;
 
     /**
@@ -50,7 +50,7 @@ public class CouponServiceImpl implements CouponService {
         // 移除用户已经领取过的优惠卷, 获取通过优惠卷获取用户信息, 返回不包含该用户的优惠卷
         shopCouponList = shopCouponList.stream()
                 .filter(shopCoupon ->
-                        !memberCouponRepository.findAllByCouponId(shopCoupon.getId()).stream().map(ShopMemberCoupon::getUserId).toList().contains(userId)
+                        memberCouponRepository.findByUserIdAndCouponId(shopCoupon.getId(), userId) == null
                 ).toList();
         // 转换信息为自己想要的
         List<CouponVO> couponVOList = shopCouponList.stream().map(shopCoupon -> BeanUtil.copyProperties(shopCoupon, CouponVO.class)).toList();
@@ -76,15 +76,20 @@ public class CouponServiceImpl implements CouponService {
         shopMemberCoupon.setExpireTime(LocalDateTime.now().plusDays(shopCoupon.getExpireDay()));
         shopMemberCoupon.setUseStatus((short) 0);
         shopMemberCoupon.setStoreId(shopCouponDTO.getStoreId());
+        shopMemberCoupon.setDelFlag((short) 0);
         memberCouponRepository.save(shopMemberCoupon);
         // 更新优惠卷数据
         shopCoupon.setReceiveNum(shopCoupon.getReceiveNum() + 1);
         couponRepository.saveAndFlush(shopCoupon);
-        // 处理关注店铺 , 异步处理,使用rabbitmq
-        Map<String, Long> info = new HashMap<>();
-        info.put("userId", userId);
-        info.put("storeId", shopCouponDTO.getStoreId());
-        rabbitTemplate.convertAndSend(RabbitMQConstant.QUEUE_KEY, info);
+        // 判读是否关注店铺
+        shopMemberCoupon = memberCouponRepository.findByUserIdAndCouponId(userId, shopCouponDTO.getCouponId());
+        if (shopMemberCoupon != null) {
+            // 处理关注店铺 , 异步处理,使用rabbitmq
+            Map<String, Long> info = new HashMap<>();
+            info.put("userId", userId);
+            info.put("storeId", shopCouponDTO.getStoreId());
+            rabbitTemplate.convertAndSend(RabbitMQConstant.QUEUE_KEY, info);
+        }
     }
 
     /**
