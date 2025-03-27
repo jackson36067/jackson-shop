@@ -12,4 +12,8 @@ public interface GoodsRepository extends JpaRepository<ShopGood, Long>, JpaSpeci
 
     // 通过分类 ID 查询所有商品，并支持分页
     Page<ShopGood> findAllByShopCategoryId(Long categoryId, Pageable pageable);
+
+    List<ShopGood> findAllByIdInAndNameLike(List<Long> ids, String goodsName);
+
+    Page<ShopGood> findAllByShopStore_Id(Long storeId, Pageable pageable);
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="jackson_mall@localhost" uuid="46ccb129-7e7d-473d-9050-7d1ae2d3989a">
+    <data-source source="LOCAL" name="jackson_mall@localhost" uuid="2625b9a4-ec2b-41fa-89fe-48a900cd2d28">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
@@ -14,7 +14,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="10@192.168.80.101" uuid="81e636da-cd42-4fc1-8c06-bfbd4ef216cc">
+    <data-source source="LOCAL" name="10@192.168.80.101" uuid="e41c870f-6d5d-4ad2-881b-b2a0f57fef63">
       <driver-ref>redis</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
