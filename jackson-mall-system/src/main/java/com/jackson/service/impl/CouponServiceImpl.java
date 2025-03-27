@@ -83,7 +83,7 @@ public class CouponServiceImpl implements CouponService {
         couponRepository.saveAndFlush(shopCoupon);
         // 判读是否关注店铺
         shopMemberCoupon = memberCouponRepository.findByUserIdAndCouponId(userId, shopCouponDTO.getCouponId());
-        if (shopMemberCoupon != null) {
+        if (shopMemberCoupon == null) {
             // 处理关注店铺 , 异步处理,使用rabbitmq
             Map<String, Long> info = new HashMap<>();
             info.put("userId", userId);
