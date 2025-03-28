@@ -26,6 +26,7 @@ import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
@@ -76,7 +77,8 @@ public class MemberServiceImpl implements MemberService {
                 throw new MemberNotFoundException(MemberConstant.MEMBER_NOT_FOUND);
             }
             // 手机号搭配密码进行登录
-            if (!memberLoginDTO.getPassword().equals(shopMember.getPassword())) {
+            String md5Password = DigestUtils.md5DigestAsHex(memberLoginDTO.getPassword().getBytes());
+            if (!md5Password.equals(shopMember.getPassword())) {
                 throw new PasswordErrorException(MemberConstant.MEMBER_PASSWORD_ERROR);
             }
         }
