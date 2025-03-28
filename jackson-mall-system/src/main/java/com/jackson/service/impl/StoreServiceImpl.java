@@ -2,9 +2,12 @@ package com.jackson.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.aliyuncs.utils.StringUtils;
+import com.jackson.constant.BrowseHistoryConstant;
+import com.jackson.constant.RabbitMQConstant;
 import com.jackson.context.BaseContext;
 import com.jackson.dto.CancelFollowStoreDTO;
 import com.jackson.dto.FollowStoreDTO;
+import com.jackson.entity.ShopMemberBrowseHistory;
 import com.jackson.entity.ShopMemberFollowStore;
 import com.jackson.entity.ShopStore;
 import com.jackson.repository.MemberFollowStoreRepository;
@@ -15,9 +18,12 @@ import com.jackson.utils.DateTimeFormatUtils;
 import com.jackson.vo.FollowStoreVO;
 import com.jackson.vo.StoreVO;
 import jakarta.annotation.Resource;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StoreServiceImpl implements StoreService {
@@ -26,6 +32,8 @@ public class StoreServiceImpl implements StoreService {
     private StoreRepository storeRepository;
     @Resource
     private MemberFollowStoreRepository memberFollowStoreRepository;
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 根据id获取店家信息
@@ -47,6 +55,12 @@ public class StoreServiceImpl implements StoreService {
         } else {
             storeVO.setIsFollow(false);
         }
+        // 将用户访问店铺添加到浏览记录表中 -> 异步处理,将店铺id以及
+        Map<String, Long> browseInfo = new HashMap<>();
+        browseInfo.put("storeId", id);
+        browseInfo.put("memberId", userId);
+        browseInfo.put("type", 1L);
+        rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY, browseInfo);
         return Result.success(storeVO);
     }
 

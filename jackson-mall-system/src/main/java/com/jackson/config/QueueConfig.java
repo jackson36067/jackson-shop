@@ -11,8 +11,22 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class QueueConfig {
+
+    /**
+     * 处理用户关注店铺动作队列
+     * @return
+     */
     @Bean
     public Queue genObjectQueue() {
         return QueueBuilder.durable(RabbitMQConstant.QUEUE_KEY).build();
+    }
+
+    /**
+     * 处理保存浏览记录队列
+     * @return
+     */
+    @Bean
+    public Queue genBrowseQueue() {
+        return QueueBuilder.durable(RabbitMQConstant.BROWSE_QUEUE_KEY).build();
     }
 }

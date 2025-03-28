@@ -18,4 +18,6 @@ public interface MemberService {
     Result<String> uploadImage(MultipartFile file);
 
     void updateMember(UpdateMemberDTO updateMemberDTO);
+
+    void memberLogout();
 }

@@ -61,10 +61,19 @@ public class MemberController {
 
     /**
      * 更新用户接口
+     *
      * @param updateMemberDTO 更新用户数据参数
      */
     @PutMapping("/update")
     public void updateMember(@RequestBody UpdateMemberDTO updateMemberDTO) {
         memberService.updateMember(updateMemberDTO);
+    }
+
+    /**
+     * 用户退出登录
+     */
+    @PostMapping("/logout")
+    public void memberLogout() {
+        memberService.memberLogout();
     }
 }

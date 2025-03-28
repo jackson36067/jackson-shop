@@ -31,7 +31,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -169,5 +168,12 @@ public class MemberServiceImpl implements MemberService {
             shopMember.setEmail(updateMemberDTO.getEmail());
         }
         memberRepository.saveAndFlush(shopMember);
+    }
+
+    /**
+     * 用户退出登录
+     */
+    public void memberLogout() {
+        BaseContext.removeCurrentId();
     }
 }
