@@ -1,12 +1,10 @@
 package com.jackson.controller;
 
-import com.jackson.dto.MemberLoginDTO;
-import com.jackson.dto.MemberSendCodeDTO;
+import com.jackson.dto.*;
 import com.jackson.result.Result;
 import com.jackson.service.MemberService;
 import com.jackson.vo.MemberLoginVO;
 import com.jackson.vo.MemberVO;
-import com.jackson.dto.UpdateMemberDTO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,5 +73,20 @@ public class MemberController {
     @PostMapping("/logout")
     public void memberLogout() {
         memberService.memberLogout();
+    }
+
+
+    @PostMapping("/password")
+    public void updateMemberPassword(@RequestBody UpdatePasswordDTO updatePasswordDTO) {
+        memberService.updateMemberPassword(updatePasswordDTO);
+    }
+
+    /**
+     * 更改用户邮箱
+     * @param updateEmailDTO
+     */
+    @PostMapping("/email")
+    public void updateMemberEmail(@RequestBody UpdateEmailDTO updateEmailDTO) {
+        memberService.updateMemberEmailDTO(updateEmailDTO);
     }
 }

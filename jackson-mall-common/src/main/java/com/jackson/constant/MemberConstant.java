@@ -6,4 +6,6 @@ public class MemberConstant {
     public static final String MEMBER_ACCOUNT_LOCK = "你的账号被冻结";
     public static final String CODE_ERROR = "验证码错误";
     public static final String member_id = "memberId";
+    public static final String PASSWORD_DIFFERENT = "旧密码错误";
+    public static final String EMAIL_EXIST = "邮箱已存在";
 }

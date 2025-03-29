@@ -1,8 +1,6 @@
 package com.jackson.service;
 
-import com.jackson.dto.MemberLoginDTO;
-import com.jackson.dto.MemberSendCodeDTO;
-import com.jackson.dto.UpdateMemberDTO;
+import com.jackson.dto.*;
 import com.jackson.result.Result;
 import com.jackson.vo.MemberLoginVO;
 import com.jackson.vo.MemberVO;
@@ -20,4 +18,8 @@ public interface MemberService {
     void updateMember(UpdateMemberDTO updateMemberDTO);
 
     void memberLogout();
+
+    void updateMemberPassword(UpdatePasswordDTO updatePasswordDTO);
+
+    void updateMemberEmailDTO(UpdateEmailDTO updateEmailDTO);
 }

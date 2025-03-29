@@ -1,6 +1,6 @@
 package com.jackson.exception;
 
-public class CodeErrorException extends BaseException{
+public class CodeErrorException extends NoAuthenticationException{
     public CodeErrorException() {
     }
 

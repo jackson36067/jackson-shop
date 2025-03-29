@@ -1,6 +1,6 @@
 package com.jackson.exception;
 
-public class AccountLockException extends BaseException {
+public class AccountLockException extends NoAuthenticationException {
     public AccountLockException() {
     }
 

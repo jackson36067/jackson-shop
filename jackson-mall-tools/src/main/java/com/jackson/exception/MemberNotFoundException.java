@@ -1,6 +1,6 @@
 package com.jackson.exception;
 
-public class MemberNotFoundException extends BaseException{
+public class MemberNotFoundException extends NoAuthenticationException{
     public MemberNotFoundException() {
     }
 

@@ -1,6 +1,6 @@
 package com.jackson.exception;
 
-public class PasswordErrorException extends BaseException{
+public class PasswordErrorException extends NoAuthenticationException{
     public PasswordErrorException() {
     }
 

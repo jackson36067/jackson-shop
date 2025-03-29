@@ -6,14 +6,9 @@ import com.jackson.constant.EmailConstant;
 import com.jackson.constant.MemberConstant;
 import com.jackson.constant.RedisConstant;
 import com.jackson.context.BaseContext;
-import com.jackson.dto.MemberLoginDTO;
-import com.jackson.dto.MemberSendCodeDTO;
-import com.jackson.dto.UpdateMemberDTO;
+import com.jackson.dto.*;
 import com.jackson.entity.ShopMember;
-import com.jackson.exception.AccountLockException;
-import com.jackson.exception.CodeErrorException;
-import com.jackson.exception.MemberNotFoundException;
-import com.jackson.exception.PasswordErrorException;
+import com.jackson.exception.*;
 import com.jackson.repository.MemberRepository;
 import com.jackson.result.Result;
 import com.jackson.service.MemberService;
@@ -69,7 +64,7 @@ public class MemberServiceImpl implements MemberService {
                 throw new CodeErrorException(MemberConstant.CODE_ERROR);
             }
         } else {
-            // 手机号登录
+            // 用户名登录
             shopMember = memberRepository.findByNickname(memberLoginDTO.getNickname());
             // 判断该用户是否存在
             if (shopMember == null) {
@@ -77,7 +72,7 @@ public class MemberServiceImpl implements MemberService {
                 throw new MemberNotFoundException(MemberConstant.MEMBER_NOT_FOUND);
             }
             // 手机号搭配密码进行登录
-            String md5Password = DigestUtils.md5DigestAsHex(memberLoginDTO.getPassword().getBytes());
+            String md5Password = DigestUtils.md5DigestAsHex(memberLoginDTO.getPassword().trim().getBytes());
             if (!md5Password.equals(shopMember.getPassword())) {
                 throw new PasswordErrorException(MemberConstant.MEMBER_PASSWORD_ERROR);
             }
@@ -157,10 +152,6 @@ public class MemberServiceImpl implements MemberService {
         if (updateMemberDTO.getBirthday() != null && !Objects.equals(updateMemberDTO.getBirthday(), shopMember.getBirthday())) {
             shopMember.setBirthday(updateMemberDTO.getBirthday());
         }
-        // 判断是否需要修改密码
-        if (!StringUtil.isNullOrEmpty(updateMemberDTO.getPassword()) && !updateMemberDTO.getPassword().equals(shopMember.getPassword())) {
-            shopMember.setPassword(updateMemberDTO.getPassword());
-        }
         // 判断是否需要修改手机号
         if (!StringUtil.isNullOrEmpty(updateMemberDTO.getMobile()) && !updateMemberDTO.getMobile().equals(shopMember.getMobile())) {
             shopMember.setMobile(updateMemberDTO.getMobile());
@@ -177,5 +168,40 @@ public class MemberServiceImpl implements MemberService {
      */
     public void memberLogout() {
         BaseContext.removeCurrentId();
+    }
+
+    /**
+     * 修改用户密码
+     *
+     * @param updatePasswordDTO 接收用户新旧密码
+     */
+    public void updateMemberPassword(UpdatePasswordDTO updatePasswordDTO) {
+        ShopMember shopMember = memberRepository.findById(BaseContext.getCurrentId()).get();
+        // 比较旧密码是否正取
+        String password = DigestUtils.md5DigestAsHex(updatePasswordDTO.getPassword().getBytes());
+        if (!password.equals(shopMember.getPassword())) {
+            throw new PasswordDifferentException(MemberConstant.PASSWORD_DIFFERENT);
+        }
+        shopMember.setPassword(DigestUtils.md5DigestAsHex(updatePasswordDTO.getPassword().getBytes()));
+        memberRepository.saveAndFlush(shopMember);
+    }
+
+    /**
+     * 更改用户邮箱
+     *
+     * @param updateEmailDTO
+     */
+    public void updateMemberEmailDTO(UpdateEmailDTO updateEmailDTO) {
+        ShopMember shopMember = memberRepository.findByEmail(updateEmailDTO.getNewEmail());
+        if (shopMember != null) {
+            throw new EmailExistException(MemberConstant.EMAIL_EXIST);
+        }
+        String code = stringRedisTemplate.opsForValue().get(RedisConstant.SHOP_EMAIL_CODE_PREFIX + updateEmailDTO.getNewEmail());
+        if (code != null && !code.equals(updateEmailDTO.getCode())) {
+            throw new CodeErrorException(MemberConstant.CODE_ERROR);
+        }
+        shopMember = memberRepository.findById(BaseContext.getCurrentId()).get();
+        shopMember.setEmail(updateEmailDTO.getNewEmail());
+        memberRepository.saveAndFlush(shopMember);
     }
 }

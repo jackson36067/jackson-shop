@@ -12,12 +12,11 @@ public class UpdateMemberDTO implements Serializable {
     private LocalDate birthday;
     private String mobile;
     private String email;
-    private String password;
 
     public UpdateMemberDTO() {
     }
 
-    public UpdateMemberDTO(Long id, String nickname, String avatar, Short gender, LocalDate birthday, String mobile, String email, String password) {
+    public UpdateMemberDTO(Long id, String nickname, String avatar, Short gender, LocalDate birthday, String mobile, String email ) {
         this.id = id;
         this.nickname = nickname;
         this.avatar = avatar;
@@ -25,7 +24,6 @@ public class UpdateMemberDTO implements Serializable {
         this.birthday = birthday;
         this.mobile = mobile;
         this.email = email;
-        this.password = password;
     }
 
     public Long getId() {
@@ -84,25 +82,18 @@ public class UpdateMemberDTO implements Serializable {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UpdateMemberDTO that = (UpdateMemberDTO) o;
-        return Objects.equals(id, that.id) && Objects.equals(nickname, that.nickname) && Objects.equals(avatar, that.avatar) && Objects.equals(gender, that.gender) && Objects.equals(birthday, that.birthday) && Objects.equals(mobile, that.mobile) && Objects.equals(email, that.email) && Objects.equals(password, that.password);
+        return Objects.equals(id, that.id) && Objects.equals(nickname, that.nickname) && Objects.equals(avatar, that.avatar) && Objects.equals(gender, that.gender) && Objects.equals(birthday, that.birthday) && Objects.equals(mobile, that.mobile) && Objects.equals(email, that.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nickname, avatar, gender, birthday, mobile, email, password);
+        return Objects.hash(id, nickname, avatar, gender, birthday, mobile, email);
     }
 
     @Override
@@ -115,7 +106,6 @@ public class UpdateMemberDTO implements Serializable {
                 ", birthday=" + birthday +
                 ", mobile='" + mobile + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
                 '}';
     }
 }
