@@ -9,6 +9,7 @@ import com.jackson.result.Result;
 import com.jackson.service.CartService;
 import com.jackson.vo.CartGoodsVO;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,8 @@ public class CartServiceImpl implements CartService {
     private MemberCollectGoodsRepository memberCollectGoodsRepository;
     @Resource
     private MemberCouponRepository memberCouponRepository;
+    @Autowired
+    private MemberFollowStoreRepository memberFollowStoreRepository;
 
     /**
      * 获取用户购物车所有商品
@@ -54,6 +57,7 @@ public class CartServiceImpl implements CartService {
                             ShopStore shopStore = shopGood.getShopStore();
                             cartGoodsVO.setStoreId(shopStore.getId());
                             cartGoodsVO.setStoreName(shopStore.getName());
+                            cartGoodsVO.setIsFollow(memberFollowStoreRepository.existsByMemberIdAndStoreId(userId,shopStore.getId()));
                             // 判断店家是否提供优惠卷 -> 从优惠卷数据库中判断该店家是否有提供优惠卷以及这些优惠卷用户是否已经领取
                             List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStoreId(shopGood.getShopStore().getId());
                             // 用户是否有可领取的优惠卷

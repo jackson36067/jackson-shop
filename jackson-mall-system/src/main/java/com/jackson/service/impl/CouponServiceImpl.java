@@ -1,6 +1,7 @@
 package com.jackson.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.jackson.constant.CouponConstant;
 import com.jackson.constant.RabbitMQConstant;
 import com.jackson.context.BaseContext;
 import com.jackson.dto.RemoveMemberCouponDTO;
@@ -8,18 +9,24 @@ import com.jackson.dto.StoreCouponDTO;
 import com.jackson.entity.ShopCoupon;
 import com.jackson.entity.ShopMemberCoupon;
 import com.jackson.entity.ShopStore;
+import com.jackson.exception.CouponNumberNullException;
+import com.jackson.exception.HaveCouponException;
 import com.jackson.repository.CouponRepository;
 import com.jackson.repository.MemberCouponRepository;
+import com.jackson.repository.MemberFollowStoreRepository;
 import com.jackson.repository.StoreRepository;
 import com.jackson.result.Result;
 import com.jackson.service.CouponService;
 import com.jackson.vo.CouponVO;
 import com.jackson.vo.MemberCouponItemVO;
+import com.jackson.vo.MemberCouponTypeVO;
 import com.jackson.vo.MemberCouponVO;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,6 +43,22 @@ public class CouponServiceImpl implements CouponService {
     private RabbitTemplate rabbitTemplate;
     @Resource
     private StoreRepository storeRepository;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private MemberFollowStoreRepository memberFollowStoreRepository;
+
+    private static final DefaultRedisScript<Long> COUPON_SCRIPT;
+
+    // 定义使用redis读取lua脚本
+    static {
+        COUPON_SCRIPT = new DefaultRedisScript<>();
+        // 设置脚本返回类型
+        COUPON_SCRIPT.setResultType(Long.class);
+        // 设置脚本路径, /resource/coupon.lua
+        COUPON_SCRIPT.setLocation(new ClassPathResource("coupon.lua"));
+    }
+
 
     /**
      * 获取店铺提供的优惠卷
@@ -64,31 +87,32 @@ public class CouponServiceImpl implements CouponService {
      */
     @Transactional
     public void getStoreCoupon(StoreCouponDTO shopCouponDTO) {
-        // 处理优惠卷 -> 保存到用户优惠卷数据库
-        ShopCoupon shopCoupon = couponRepository.findById(shopCouponDTO.getCouponId()).get();
         Long userId = BaseContext.getCurrentId();
-        ShopMemberCoupon shopMemberCoupon = new ShopMemberCoupon();
-        shopMemberCoupon.setDiscount(shopCoupon.getDiscount());
-        shopMemberCoupon.setMin(shopCoupon.getMin());
-        shopMemberCoupon.setTitle(shopCoupon.getTitle());
-        shopMemberCoupon.setUserId(userId);
-        shopMemberCoupon.setCouponId(shopCouponDTO.getCouponId());
-        shopMemberCoupon.setExpireTime(LocalDateTime.now().plusDays(shopCoupon.getExpireDay()));
-        shopMemberCoupon.setUseStatus((short) 0);
-        shopMemberCoupon.setStoreId(shopCouponDTO.getStoreId());
-        shopMemberCoupon.setDelFlag((short) 0);
-        memberCouponRepository.save(shopMemberCoupon);
-        // 更新优惠卷数据
-        shopCoupon.setReceiveNum(shopCoupon.getReceiveNum() + 1);
-        couponRepository.saveAndFlush(shopCoupon);
+        // 执行lua脚本,获取返回结果
+        Long result = stringRedisTemplate.execute(COUPON_SCRIPT, Collections.emptyList(), userId.toString(), shopCouponDTO.getCouponId().toString());
+        // 结果为1 -> 优惠卷被抢光了
+        if (result == 1) {
+            throw new CouponNumberNullException(CouponConstant.COUPON_NULL);
+        }
+        // 结果为2 -> 该用户已经拥有了该优惠卷
+        if (result == 2) {
+            throw new HaveCouponException(CouponConstant.OWNER_COUPON);
+        }
+        // 用户拥有条件抢购优惠卷, 通过异步删减库存以及保存用户抢购优惠卷信息
+        Map<String, Long> info = new HashMap<>();
+        // 封装异步需要的信息
+        info.put("userId", userId);
+        info.put("couponId", shopCouponDTO.getCouponId());
+        info.put("storeId", shopCouponDTO.getStoreId());
+        rabbitTemplate.convertAndSend(RabbitMQConstant.COUPON_QUEUE, info);
         // 判读是否关注店铺
-        shopMemberCoupon = memberCouponRepository.findByUserIdAndCouponId(userId, shopCouponDTO.getCouponId());
-        if (shopMemberCoupon == null) {
-            // 处理关注店铺 , 异步处理,使用rabbitmq
-            Map<String, Long> info = new HashMap<>();
-            info.put("userId", userId);
-            info.put("storeId", shopCouponDTO.getStoreId());
-            rabbitTemplate.convertAndSend(RabbitMQConstant.QUEUE_KEY, info);
+        if (shopCouponDTO.getStoreId() != null) {
+            Boolean IsFollow = memberFollowStoreRepository.existsByMemberIdAndStoreId(userId, shopCouponDTO.getStoreId());
+            // 如果未关注店铺 -> 那么就发送异步关注店铺
+            if (!IsFollow) {
+                info.remove("couponId");
+                rabbitTemplate.convertAndSend(RabbitMQConstant.QUEUE_KEY, info);
+            }
         }
     }
 
@@ -97,30 +121,58 @@ public class CouponServiceImpl implements CouponService {
      *
      * @return
      */
-    public Result<List<MemberCouponVO>> getMemberCouponList() {
+    // TODO: 根据类型分组 G.平台获取的 1.店铺领取的
+    public Result<List<MemberCouponTypeVO>> getMemberCouponList() {
+        // 返回结果
+        List<MemberCouponTypeVO> result = new ArrayList<>();
+
         // 获取所有用户可以使用的优惠卷 参数一: 用户id, 参数二: 是否被使用, 参数三: 是否被删除, 参数四: 是否过期
         List<ShopMemberCoupon> shopMemberCouponList = memberCouponRepository.findAllByUserIdAndUseStatusAndDelFlagAndExpireTimeAfter(BaseContext.getCurrentId(), (short) 0, (short) 0, LocalDateTime.now());
-        // 通过storeId分组得到每个店铺提供的优惠卷列表
-        Map<Long, List<ShopMemberCoupon>> shopMemberCouponListGroupByStoreId = shopMemberCouponList.stream().collect(Collectors.groupingBy(ShopMemberCoupon::getStoreId));
         // 遍历shopMemberCouponListGroupByStoreId-key数据得到想要的数据返回
-        List<MemberCouponVO> memberCouponVOList = shopMemberCouponListGroupByStoreId.keySet().stream().map(storeId -> {
-                    MemberCouponVO memberCouponVO = new MemberCouponVO();
-                    // 获取shopStore
-                    ShopStore shopStore = storeRepository.findById(storeId).get();
-                    // 封装店铺相关数据
-                    memberCouponVO.setStoreId(shopStore.getId());
-                    memberCouponVO.setAvatar(shopStore.getAvatar());
-                    memberCouponVO.setName(shopStore.getName());
-                    // 设置每个店铺的优惠卷列表
-                    List<MemberCouponItemVO> memberCouponItemVOList = shopMemberCouponListGroupByStoreId.get(storeId)
-                            .stream()
-                            .map(shopMemberCoupon -> BeanUtil.copyProperties(shopMemberCoupon, MemberCouponItemVO.class))
-                            .toList();
-                    memberCouponVO.setMemberCouponItemVOList(memberCouponItemVOList);
-                    return memberCouponVO;
-                })
-                .toList();
-        return Result.success(memberCouponVOList);
+        Map<Boolean, List<ShopMemberCoupon>> collected = shopMemberCouponList.stream().collect(Collectors.groupingBy(shopMemberCoupon -> shopMemberCoupon.getStoreId() != null));
+
+        // 平台提供的优惠卷
+        List<ShopMemberCoupon> shopMemberPlatformCoupon = collected.get(false);
+        if (shopMemberPlatformCoupon != null && !shopMemberPlatformCoupon.isEmpty()) {
+            // 封装平台提供的商品结果
+            List<MemberCouponItemVO> memberPlatformCouponItemVoList = shopMemberPlatformCoupon.stream()
+                    .map(shopMemberCoupon -> BeanUtil.copyProperties(shopMemberCoupon, MemberCouponItemVO.class))
+                    .toList();
+            MemberCouponTypeVO<MemberCouponItemVO> memberCouponItemVOMemberCouponTypeVO = new MemberCouponTypeVO<>();
+            memberCouponItemVOMemberCouponTypeVO.setMemberCouponList(memberPlatformCouponItemVoList);
+            memberCouponItemVOMemberCouponTypeVO.setType("平台");
+            result.add(memberCouponItemVOMemberCouponTypeVO);
+        }
+
+        // 店铺提供的优惠卷
+        List<ShopMemberCoupon> shopMemberStoreCouponemberCouponList = collected.get(true);
+        // 通过storeId分组得到每个店铺提供的优惠卷列表
+        if (shopMemberStoreCouponemberCouponList != null && !shopMemberStoreCouponemberCouponList.isEmpty()) {
+            Map<Long, List<ShopMemberCoupon>> shopMemberCouponListGroupByStoreId = shopMemberStoreCouponemberCouponList.stream().collect(Collectors.groupingBy(ShopMemberCoupon::getStoreId));
+            List<MemberCouponVO> memberCouponVOList = shopMemberCouponListGroupByStoreId.keySet().stream().map(storeId -> {
+                        MemberCouponVO memberCouponVO = new MemberCouponVO();
+                        // 获取shopStore
+                        ShopStore shopStore = storeRepository.findById(storeId).get();
+                        // 封装店铺相关数据
+                        memberCouponVO.setStoreId(shopStore.getId());
+                        memberCouponVO.setAvatar(shopStore.getAvatar());
+                        memberCouponVO.setName(shopStore.getName());
+                        // 设置每个店铺的优惠卷列表
+                        List<MemberCouponItemVO> memberStoreCouponItemVOList = shopMemberCouponListGroupByStoreId.get(storeId)
+                                .stream()
+                                .map(shopMemberCoupon -> BeanUtil.copyProperties(shopMemberCoupon, MemberCouponItemVO.class))
+                                .toList();
+                        memberCouponVO.setMemberCouponItemVOList(memberStoreCouponItemVOList);
+                        return memberCouponVO;
+                    })
+                    .toList();
+            // 封装店铺提供的优惠卷数据
+            MemberCouponTypeVO<MemberCouponVO> memberCouponVOMemberCouponTypeVO = new MemberCouponTypeVO<>();
+            memberCouponVOMemberCouponTypeVO.setMemberCouponList(memberCouponVOList);
+            memberCouponVOMemberCouponTypeVO.setType("店铺");
+            result.add(memberCouponVOMemberCouponTypeVO);
+        }
+        return Result.success(result);
     }
 
     /**

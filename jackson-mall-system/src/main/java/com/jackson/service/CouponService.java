@@ -4,7 +4,7 @@ import com.jackson.dto.RemoveMemberCouponDTO;
 import com.jackson.dto.StoreCouponDTO;
 import com.jackson.result.Result;
 import com.jackson.vo.CouponVO;
-import com.jackson.vo.MemberCouponVO;
+import com.jackson.vo.MemberCouponTypeVO;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public interface CouponService {
 
     void getStoreCoupon(StoreCouponDTO shopCouponDTO);
 
-    Result<List<MemberCouponVO>> getMemberCouponList();
+    Result<List<MemberCouponTypeVO>> getMemberCouponList();
 
     void removeAllByMemberCouponIdList(RemoveMemberCouponDTO removeMemberCouponDTO);
 }

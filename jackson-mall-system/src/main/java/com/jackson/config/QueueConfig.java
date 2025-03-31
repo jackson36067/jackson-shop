@@ -29,4 +29,9 @@ public class QueueConfig {
     public Queue genBrowseQueue() {
         return QueueBuilder.durable(RabbitMQConstant.BROWSE_QUEUE_KEY).build();
     }
+
+    @Bean
+    public Queue genCouponQueue() {
+        return QueueBuilder.durable(RabbitMQConstant.COUPON_QUEUE).build();
+    }
 }

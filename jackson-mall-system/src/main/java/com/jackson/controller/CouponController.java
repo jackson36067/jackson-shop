@@ -5,6 +5,7 @@ import com.jackson.dto.StoreCouponDTO;
 import com.jackson.result.Result;
 import com.jackson.service.CouponService;
 import com.jackson.vo.CouponVO;
+import com.jackson.vo.MemberCouponTypeVO;
 import com.jackson.vo.MemberCouponVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +46,7 @@ public class CouponController {
      * @return
      */
     @GetMapping("/member")
-    public Result<List<MemberCouponVO>> getMemberCouponList() {
+    public Result<List<MemberCouponTypeVO>> getMemberCouponList() {
         return couponService.getMemberCouponList();
     }
 
