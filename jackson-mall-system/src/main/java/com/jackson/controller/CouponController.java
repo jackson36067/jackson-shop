@@ -5,6 +5,7 @@ import com.jackson.dto.StoreCouponDTO;
 import com.jackson.result.Result;
 import com.jackson.service.CouponService;
 import com.jackson.vo.CouponVO;
+import com.jackson.vo.MemberCouponItemVO;
 import com.jackson.vo.MemberCouponTypeVO;
 import com.jackson.vo.MemberCouponVO;
 import jakarta.annotation.Resource;
@@ -57,5 +58,15 @@ public class CouponController {
     @PutMapping("/remove")
     public void removeMemberCoupon(@RequestBody RemoveMemberCouponDTO removeMemberCouponDTO) {
         couponService.removeAllByMemberCouponIdList(removeMemberCouponDTO);
+    }
+
+    /**
+     * 获取用户可领取的平台提供的优惠卷
+     *
+     * @return
+     */
+    @GetMapping("/center")
+    public Result<List<CouponVO>> getCenterCoupon() {
+        return couponService.getCenterCoupon();
     }
 }

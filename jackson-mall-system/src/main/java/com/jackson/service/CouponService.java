@@ -16,4 +16,6 @@ public interface CouponService {
     Result<List<MemberCouponTypeVO>> getMemberCouponList();
 
     void removeAllByMemberCouponIdList(RemoveMemberCouponDTO removeMemberCouponDTO);
+
+    Result<List<CouponVO>> getCenterCoupon();
 }

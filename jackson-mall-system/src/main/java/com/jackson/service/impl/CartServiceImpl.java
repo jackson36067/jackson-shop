@@ -12,6 +12,7 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -59,7 +60,7 @@ public class CartServiceImpl implements CartService {
                             cartGoodsVO.setStoreName(shopStore.getName());
                             cartGoodsVO.setIsFollow(memberFollowStoreRepository.existsByMemberIdAndStoreId(userId,shopStore.getId()));
                             // 判断店家是否提供优惠卷 -> 从优惠卷数据库中判断该店家是否有提供优惠卷以及这些优惠卷用户是否已经领取
-                            List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStoreId(shopGood.getShopStore().getId());
+                            List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStore_IdAndExpireTimeAfter(shopGood.getShopStore().getId(), LocalDateTime.now());
                             // 用户是否有可领取的优惠卷
                             AtomicBoolean isUserGet = new AtomicBoolean(false);
                             // 判断用户是否有领取优惠卷 -> 只要有一个没有领取就设置为true

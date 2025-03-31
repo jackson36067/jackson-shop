@@ -29,4 +29,6 @@ public interface MemberCouponRepository extends JpaRepository<ShopMemberCoupon, 
     void updateDelFlagByIds(@Param("ids") List<Long> ids, @Param("delFlag") Short delFlag);
 
     ShopMemberCoupon findByUserIdAndCouponId(Long userId, Long couponId);
+
+    boolean existsByUserIdAndCouponId(Long userId, Long couponId);
 }

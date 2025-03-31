@@ -61,19 +61,19 @@ public class CouponServiceImpl implements CouponService {
 
 
     /**
-     * 获取店铺提供的优惠卷
+     * 获取用户可以获取的店铺提供的优惠卷列表
      *
      * @param id 店家id
      * @return
      */
     public Result<List<CouponVO>> getUnGetStoreCouponList(Long id) {
         // 获取该店家所有优惠卷
-        List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStoreId(id);
+        List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStore_IdAndExpireTimeAfter(id,LocalDateTime.now());
         Long userId = BaseContext.getCurrentId();
         // 移除用户已经领取过的优惠卷, 获取通过优惠卷获取用户信息, 返回不包含该用户的优惠卷
         shopCouponList = shopCouponList.stream()
                 .filter(shopCoupon ->
-                        memberCouponRepository.findByUserIdAndCouponId(shopCoupon.getId(), userId) == null
+                        memberCouponRepository.existsByUserIdAndCouponId(userId, shopCoupon.getId())
                 ).toList();
         // 转换信息为自己想要的
         List<CouponVO> couponVOList = shopCouponList.stream().map(shopCoupon -> BeanUtil.copyProperties(shopCoupon, CouponVO.class)).toList();
@@ -121,7 +121,6 @@ public class CouponServiceImpl implements CouponService {
      *
      * @return
      */
-    // TODO: 根据类型分组 G.平台获取的 1.店铺领取的
     public Result<List<MemberCouponTypeVO>> getMemberCouponList() {
         // 返回结果
         List<MemberCouponTypeVO> result = new ArrayList<>();
@@ -184,5 +183,24 @@ public class CouponServiceImpl implements CouponService {
         // 这里不能将优惠卷数据删除, 因为判断用户是否拥有该店铺的优惠卷时需要判断是否有该数据
         // 这里可以将用户优惠卷中的字段delFlag改成删除状态,让数据保留
         memberCouponRepository.updateDelFlagByIds(removeMemberCouponDTO.getIdList(), (short) 1);
+    }
+
+    /**
+     * 获取用户可领取的平台提供的优惠卷
+     *
+     * @return
+     */
+    public Result<List<CouponVO>> getCenterCoupon() {
+        // 获取所有平台提供的优惠卷
+        List<ShopCoupon> platformCouponList = couponRepository.findAllByTypeAndExpireTimeBefore((short) 1,LocalDateTime.now());
+        // 过滤出用户已经获取的优惠卷
+        List<CouponVO> platformCouponVoList = platformCouponList
+                .stream()
+                .filter(platformCoupon ->
+                        memberCouponRepository.existsByUserIdAndCouponId(BaseContext.getCurrentId(), platformCoupon.getId())
+                )
+                .map(shopCoupon -> BeanUtil.copyProperties(shopCoupon,CouponVO.class))
+                .toList();
+        return Result.success(platformCouponVoList);
     }
 }
