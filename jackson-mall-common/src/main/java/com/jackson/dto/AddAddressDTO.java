@@ -7,7 +7,7 @@ public class AddAddressDTO implements Serializable {
     private String name;
     private String province;
     private String city;
-    private String country;
+    private String county;
     private String addressDetail;
     private String areaCode;
     private String postalCode;
@@ -22,7 +22,7 @@ public class AddAddressDTO implements Serializable {
         this.name = name;
         this.province = province;
         this.city = city;
-        this.country = country;
+        this.county = country;
         this.addressDetail = addressDetail;
         this.areaCode = areaCode;
         this.postalCode = postalCode;
@@ -55,12 +55,12 @@ public class AddAddressDTO implements Serializable {
         this.city = city;
     }
 
-    public String getCountry() {
-        return country;
+    public String getCounty() {
+        return county;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCounty(String county) {
+        this.county = county;
     }
 
     public String getAddressDetail() {
@@ -115,12 +115,12 @@ public class AddAddressDTO implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         AddAddressDTO that = (AddAddressDTO) o;
-        return Objects.equals(name, that.name) && Objects.equals(province, that.province) && Objects.equals(city, that.city) && Objects.equals(country, that.country) && Objects.equals(addressDetail, that.addressDetail) && Objects.equals(areaCode, that.areaCode) && Objects.equals(postalCode, that.postalCode) && Objects.equals(tel, that.tel) && Objects.equals(tag, that.tag) && Objects.equals(isDefault, that.isDefault);
+        return Objects.equals(name, that.name) && Objects.equals(province, that.province) && Objects.equals(city, that.city) && Objects.equals(county, that.county) && Objects.equals(addressDetail, that.addressDetail) && Objects.equals(areaCode, that.areaCode) && Objects.equals(postalCode, that.postalCode) && Objects.equals(tel, that.tel) && Objects.equals(tag, that.tag) && Objects.equals(isDefault, that.isDefault);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, province, city, country, addressDetail, areaCode, postalCode, tel, tag, isDefault);
+        return Objects.hash(name, province, city, county, addressDetail, areaCode, postalCode, tel, tag, isDefault);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class AddAddressDTO implements Serializable {
                 "name='" + name + '\'' +
                 ", province='" + province + '\'' +
                 ", city='" + city + '\'' +
-                ", country='" + country + '\'' +
+                ", country='" + county + '\'' +
                 ", addressDetail='" + addressDetail + '\'' +
                 ", areaCode='" + areaCode + '\'' +
                 ", postalCode='" + postalCode + '\'' +

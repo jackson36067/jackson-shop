@@ -13,4 +13,8 @@ public interface AddressService {
     void updateMemberAddress(UpdateAddressDTO updateAddressDTO);
 
     Result<List<AddressVO>> getMemberAddressList();
+
+    Result<AddressVO> getMemberAddressById(Long id);
+
+    void removeAddressById(Long id);
 }

@@ -18,6 +18,7 @@ public class AddressController {
 
     /**
      * 新增用户地址
+     *
      * @param addAddressDTO 用户地址信息
      */
     @PostMapping
@@ -27,6 +28,7 @@ public class AddressController {
 
     /**
      * 更新用户地址
+     *
      * @param updateAddressDTO
      */
     @PostMapping("/update")
@@ -36,10 +38,30 @@ public class AddressController {
 
     /**
      * 获取用户地址列表
+     *
      * @return
      */
     @GetMapping("/list")
     public Result<List<AddressVO>> getMemberAddressList() {
         return addressService.getMemberAddressList();
+    }
+
+    /**
+     * 根据地址id获取地址信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result<AddressVO> getAddressById(@PathVariable Long id) {
+        return addressService.getMemberAddressById(id);
+    }
+
+    /**
+     * 根据地址id删除地址
+     * @param id
+     */
+    @DeleteMapping("/{id}")
+    public void removeAddressById(@PathVariable Long id) {
+      addressService.removeAddressById(id);
     }
 }
