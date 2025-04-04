@@ -12,6 +12,9 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Slf4j
 public class JwtUserInterceptor implements HandlerInterceptor {
     @Override
@@ -22,6 +25,23 @@ public class JwtUserInterceptor implements HandlerInterceptor {
             return true;
         }
         String token = request.getHeader("Authorization");
+        // 这些地址直接放行,但还需要判断用户是否登录,如果登录了那么就封住用户id值
+        String uri = request.getRequestURI();
+        List<String> allowPaths = Arrays.asList(
+                "/api/goods/detail",
+                "/api/cart/list",
+                "/api/search/list"
+        );
+        boolean isMatch = allowPaths.stream().anyMatch(uri::startsWith);
+        if (isMatch) {
+            if (token != null) {
+                Claims claims = JwtUtils.parseJwt(token);
+                Long userId = Long.valueOf(claims.get(MemberConstant.member_id).toString());
+                //使用ThreadLocal对新增员工操作者的id的储存
+                BaseContext.setCurrentId(userId);
+            }
+            return true;
+        }
         //2.校验令牌
         try {
             log.info("jwt校验:{}", token);

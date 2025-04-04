@@ -87,6 +87,8 @@ public class MemberServiceImpl implements MemberService {
         String token = JwtUtils.genJwt(claims);
         MemberLoginVO memberLoginVO = BeanUtil.copyProperties(shopMember, MemberLoginVO.class);
         memberLoginVO.setToken(token);
+        // 存储登录用户id值
+        BaseContext.setCurrentId(shopMember.getId());
         return Result.success(memberLoginVO);
     }
 

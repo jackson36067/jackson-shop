@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface MemberCollectGoodsRepository extends JpaRepository<ShopMemberCollectGood, Long>, JpaSpecificationExecutor<ShopMemberCollectGood> {
-    ShopMemberCollectGood findByMemberIdAndGoodsId(Long memberId, Long goodsId);
-
     @Modifying
     @Transactional
     @Query("delete from ShopMemberCollectGood s where s.memberId = :memberId and s.goodsId = :goodsId")
     void deleteByMemberIdAndGoodsId(Long memberId, Long goodsId);
 
     Integer countByGoodsId(Long goodsId);
+
+    boolean existsByMemberIdAndGoodsId(Long memberId, Long goodsId);
 }

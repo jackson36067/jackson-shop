@@ -5,6 +5,7 @@ import com.jackson.result.GoodsPageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
 import com.jackson.vo.CollectGoodsVO;
+import com.jackson.vo.GoodsDetailVO;
 import com.jackson.vo.GoodsMessageVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -70,5 +71,15 @@ public class GoodsController {
     @GetMapping("/collect/list")
     public Result<List<CollectGoodsVO>> getCollectGoodsList(@RequestParam(required = false) String name, @RequestParam(required = false) Integer sortType, @RequestParam(required = false) Integer collectTime) {
         return goodsService.getCollectGoodsList(name, sortType, collectTime);
+    }
+
+    /**
+     * 根据商品id获取地址详情
+     * @param id 商品id
+     * @return 商品详情对象
+     */
+    @GetMapping("/detail/{id}")
+    public Result<GoodsDetailVO> getGoodsById(@PathVariable Long id) {
+        return goodsService.getGoodsDetail(id);
     }
 }

@@ -73,7 +73,7 @@ public class CartServiceImpl implements CartService {
                             }
                             cartGoodsVO.setIsContainCoupon(!shopCouponList.isEmpty() && isUserGet.get());
                             // 判断用户是否收藏了商品
-                            cartGoodsVO.setIsCollect(memberCollectGoodsRepository.findByMemberIdAndGoodsId(userId, shopCart.getGoodsId()) != null);
+                            cartGoodsVO.setIsCollect(memberCollectGoodsRepository.existsByMemberIdAndGoodsId(userId,shopCart.getGoodsId()));
                             return cartGoodsVO;
                         }
                 )
