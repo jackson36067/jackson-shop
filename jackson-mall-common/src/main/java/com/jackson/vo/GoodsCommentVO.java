@@ -7,6 +7,7 @@ import java.util.Objects;
 
 public class GoodsCommentVO implements Serializable {
     private Long id;
+    private Long userId;
     private String content;
     private String adminContent; // 管理员回复消息
     private LocalDateTime createTime;
@@ -19,8 +20,9 @@ public class GoodsCommentVO implements Serializable {
     public GoodsCommentVO() {
     }
 
-    public GoodsCommentVO(Long id, String content, String adminContent, LocalDateTime createTime, String nickname, String avatar, Short star, Boolean hasPicture, List<String> picUrl) {
+    public GoodsCommentVO(Long id, Long userId, String content, String adminContent, LocalDateTime createTime, String nickname, String avatar, Short star, Boolean hasPicture, List<String> picUrl) {
         this.id = id;
+        this.userId = userId;
         this.content = content;
         this.adminContent = adminContent;
         this.createTime = createTime;
@@ -37,6 +39,14 @@ public class GoodsCommentVO implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getContent() {
@@ -112,13 +122,14 @@ public class GoodsCommentVO implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, content, adminContent, createTime, nickname, avatar, star, hasPicture, picUrls);
+        return Objects.hash(id, userId, content, adminContent, createTime, nickname, avatar, star, hasPicture, picUrls);
     }
 
     @Override
     public String toString() {
         return "GoodsCommentVO{" +
                 "id=" + id +
+                ", userId=" + userId +
                 ", content='" + content + '\'' +
                 ", adminContent='" + adminContent + '\'' +
                 ", createTime=" + createTime +
@@ -126,7 +137,7 @@ public class GoodsCommentVO implements Serializable {
                 ", avatar='" + avatar + '\'' +
                 ", star=" + star +
                 ", hasPicture=" + hasPicture +
-                ", picUrl='" + picUrls + '\'' +
+                ", picUrls=" + picUrls +
                 '}';
     }
 }

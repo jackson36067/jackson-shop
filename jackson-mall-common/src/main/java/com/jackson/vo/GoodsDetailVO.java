@@ -7,6 +7,7 @@ import java.util.Objects;
 
 public class GoodsDetailVO implements Serializable {
     private Long id;
+    private Long storeId;
     private String name;
     private String brief;
     private List<String> gallery;
@@ -24,9 +25,10 @@ public class GoodsDetailVO implements Serializable {
     public GoodsDetailVO() {
     }
 
-    public GoodsDetailVO(String name, Long id, String brief, List<String> gallery, BigDecimal counterPrice, BigDecimal retailPrice, String detail, Boolean isCollect, List<GoodsCommentVO> goodsCommentVOList, Integer goodCommentNumber, Integer naturalCommentNumber, Integer badCommentNumber, Integer hasPictureCommentNumber, String defaultAddress) {
+    public GoodsDetailVO(String name, Long id, Long shopId, String brief, List<String> gallery, BigDecimal counterPrice, BigDecimal retailPrice, String detail, Boolean isCollect, List<GoodsCommentVO> goodsCommentVOList, Integer goodCommentNumber, Integer naturalCommentNumber, Integer badCommentNumber, Integer hasPictureCommentNumber, String defaultAddress) {
         this.name = name;
         this.id = id;
+        this.storeId = shopId;
         this.brief = brief;
         this.gallery = gallery;
         this.counterPrice = counterPrice;
@@ -47,6 +49,14 @@ public class GoodsDetailVO implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 
     public String getName() {
@@ -157,18 +167,19 @@ public class GoodsDetailVO implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         GoodsDetailVO that = (GoodsDetailVO) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(brief, that.brief) && Objects.equals(gallery, that.gallery) && Objects.equals(counterPrice, that.counterPrice) && Objects.equals(retailPrice, that.retailPrice) && Objects.equals(detail, that.detail) && Objects.equals(isCollect, that.isCollect) && Objects.equals(goodsCommentVOList, that.goodsCommentVOList) && Objects.equals(goodCommentNumber, that.goodCommentNumber) && Objects.equals(naturalCommentNumber, that.naturalCommentNumber) && Objects.equals(badCommentNumber, that.badCommentNumber) && Objects.equals(hasPictureCommentNumber, that.hasPictureCommentNumber) && Objects.equals(defaultAddress, that.defaultAddress);
+        return Objects.equals(id, that.id) && Objects.equals(storeId, that.storeId) && Objects.equals(name, that.name) && Objects.equals(brief, that.brief) && Objects.equals(gallery, that.gallery) && Objects.equals(counterPrice, that.counterPrice) && Objects.equals(retailPrice, that.retailPrice) && Objects.equals(detail, that.detail) && Objects.equals(isCollect, that.isCollect) && Objects.equals(goodsCommentVOList, that.goodsCommentVOList) && Objects.equals(goodCommentNumber, that.goodCommentNumber) && Objects.equals(naturalCommentNumber, that.naturalCommentNumber) && Objects.equals(badCommentNumber, that.badCommentNumber) && Objects.equals(hasPictureCommentNumber, that.hasPictureCommentNumber) && Objects.equals(defaultAddress, that.defaultAddress);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, brief, gallery, counterPrice, retailPrice, detail, isCollect, goodsCommentVOList, goodCommentNumber, naturalCommentNumber, badCommentNumber, hasPictureCommentNumber, defaultAddress);
+        return Objects.hash(id, storeId, name, brief, gallery, counterPrice, retailPrice, detail, isCollect, goodsCommentVOList, goodCommentNumber, naturalCommentNumber, badCommentNumber, hasPictureCommentNumber, defaultAddress);
     }
 
     @Override
     public String toString() {
         return "GoodsDetailVO{" +
                 "id=" + id +
+                ", shopId=" + storeId +
                 ", name='" + name + '\'' +
                 ", brief='" + brief + '\'' +
                 ", gallery=" + gallery +

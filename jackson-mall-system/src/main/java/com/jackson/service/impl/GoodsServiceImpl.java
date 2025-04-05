@@ -18,11 +18,7 @@ import com.jackson.vo.GoodsDetailVO;
 import com.jackson.vo.GoodsMessageVO;
 import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
-import jakarta.persistence.Id;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -246,6 +242,8 @@ public class GoodsServiceImpl implements GoodsService {
     public Result<GoodsDetailVO> getGoodsDetail(Long id) {
         ShopGood shopGoods = goodsRepository.findById(id).get();
         GoodsDetailVO goodsDetailVO = BeanUtil.copyProperties(shopGoods, GoodsDetailVO.class);
+        // 设置商品所属店铺
+        goodsDetailVO.setStoreId(shopGoods.getShopStore().getId());
         // 商品宣传图片, 本是json格式的对个图片
         List<String> bannerList = JSONUtil.toList(shopGoods.getGallery(), String.class);
         goodsDetailVO.setGallery(bannerList);
@@ -273,6 +271,7 @@ public class GoodsServiceImpl implements GoodsService {
                         // 数据库中使用json格式保存图片
                         goodsCommentVO.setPicUrls(JSONUtil.toList(shopComment.getPicUrls(), String.class));
                     }
+                    goodsCommentVO.setUserId(shopMember.getId());
                     goodsCommentVO.setAvatar(shopMember.getAvatar());
                     goodsCommentVO.setNickname(shopMember.getNickname());
                     return goodsCommentVO;
