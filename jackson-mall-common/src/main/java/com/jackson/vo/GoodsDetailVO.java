@@ -16,6 +16,7 @@ public class GoodsDetailVO implements Serializable {
     private String detail; // 商品详情
     private Boolean isCollect; // 用户是否收藏该商品
     private List<GoodsCommentVO> goodsCommentVOList; // 该商品的评论列表
+    private Integer totalCommentNumber; // 商品总评论数量
     private Integer goodCommentNumber; // 好评数量
     private Integer naturalCommentNumber; // 中评数量
     private Integer badCommentNumber; // 差评数量
@@ -25,7 +26,7 @@ public class GoodsDetailVO implements Serializable {
     public GoodsDetailVO() {
     }
 
-    public GoodsDetailVO(String name, Long id, Long shopId, String brief, List<String> gallery, BigDecimal counterPrice, BigDecimal retailPrice, String detail, Boolean isCollect, List<GoodsCommentVO> goodsCommentVOList, Integer goodCommentNumber, Integer naturalCommentNumber, Integer badCommentNumber, Integer hasPictureCommentNumber, String defaultAddress) {
+    public GoodsDetailVO(String name, Long id, Long shopId, String brief, List<String> gallery, BigDecimal counterPrice, BigDecimal retailPrice, String detail, Boolean isCollect, List<GoodsCommentVO> goodsCommentVOList, Integer totalCommentNumber, Integer goodCommentNumber, Integer naturalCommentNumber, Integer badCommentNumber, Integer hasPictureCommentNumber, String defaultAddress) {
         this.name = name;
         this.id = id;
         this.storeId = shopId;
@@ -36,6 +37,7 @@ public class GoodsDetailVO implements Serializable {
         this.detail = detail;
         this.isCollect = isCollect;
         this.goodsCommentVOList = goodsCommentVOList;
+        this.totalCommentNumber = totalCommentNumber;
         this.goodCommentNumber = goodCommentNumber;
         this.naturalCommentNumber = naturalCommentNumber;
         this.badCommentNumber = badCommentNumber;
@@ -115,6 +117,14 @@ public class GoodsDetailVO implements Serializable {
         isCollect = collect;
     }
 
+    public Integer getTotalCommentNumber() {
+        return totalCommentNumber;
+    }
+
+    public void setTotalCommentNumber(Integer totalCommentNumber) {
+        this.totalCommentNumber = totalCommentNumber;
+    }
+
     public Integer getGoodCommentNumber() {
         return goodCommentNumber;
     }
@@ -167,19 +177,19 @@ public class GoodsDetailVO implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         GoodsDetailVO that = (GoodsDetailVO) o;
-        return Objects.equals(id, that.id) && Objects.equals(storeId, that.storeId) && Objects.equals(name, that.name) && Objects.equals(brief, that.brief) && Objects.equals(gallery, that.gallery) && Objects.equals(counterPrice, that.counterPrice) && Objects.equals(retailPrice, that.retailPrice) && Objects.equals(detail, that.detail) && Objects.equals(isCollect, that.isCollect) && Objects.equals(goodsCommentVOList, that.goodsCommentVOList) && Objects.equals(goodCommentNumber, that.goodCommentNumber) && Objects.equals(naturalCommentNumber, that.naturalCommentNumber) && Objects.equals(badCommentNumber, that.badCommentNumber) && Objects.equals(hasPictureCommentNumber, that.hasPictureCommentNumber) && Objects.equals(defaultAddress, that.defaultAddress);
+        return Objects.equals(id, that.id) && Objects.equals(storeId, that.storeId) && Objects.equals(name, that.name) && Objects.equals(brief, that.brief) && Objects.equals(gallery, that.gallery) && Objects.equals(counterPrice, that.counterPrice) && Objects.equals(retailPrice, that.retailPrice) && Objects.equals(detail, that.detail) && Objects.equals(isCollect, that.isCollect) && Objects.equals(goodsCommentVOList, that.goodsCommentVOList) && Objects.equals(totalCommentNumber, that.totalCommentNumber) && Objects.equals(goodCommentNumber, that.goodCommentNumber) && Objects.equals(naturalCommentNumber, that.naturalCommentNumber) && Objects.equals(badCommentNumber, that.badCommentNumber) && Objects.equals(hasPictureCommentNumber, that.hasPictureCommentNumber) && Objects.equals(defaultAddress, that.defaultAddress);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, storeId, name, brief, gallery, counterPrice, retailPrice, detail, isCollect, goodsCommentVOList, goodCommentNumber, naturalCommentNumber, badCommentNumber, hasPictureCommentNumber, defaultAddress);
+        return Objects.hash(id, storeId, name, brief, gallery, counterPrice, retailPrice, detail, isCollect, goodsCommentVOList, totalCommentNumber, goodCommentNumber, naturalCommentNumber, badCommentNumber, hasPictureCommentNumber, defaultAddress);
     }
 
     @Override
     public String toString() {
         return "GoodsDetailVO{" +
                 "id=" + id +
-                ", shopId=" + storeId +
+                ", storeId=" + storeId +
                 ", name='" + name + '\'' +
                 ", brief='" + brief + '\'' +
                 ", gallery=" + gallery +
@@ -188,6 +198,7 @@ public class GoodsDetailVO implements Serializable {
                 ", detail='" + detail + '\'' +
                 ", isCollect=" + isCollect +
                 ", goodsCommentVOList=" + goodsCommentVOList +
+                ", totalCommentNumber=" + totalCommentNumber +
                 ", goodCommentNumber=" + goodCommentNumber +
                 ", naturalCommentNumber=" + naturalCommentNumber +
                 ", badCommentNumber=" + badCommentNumber +

@@ -1,7 +1,7 @@
 package com.jackson.controller;
 
 import com.jackson.dto.MemberCollectGoodsDTO;
-import com.jackson.result.GoodsPageResult;
+import com.jackson.result.PageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
 import com.jackson.vo.CollectGoodsVO;
@@ -33,7 +33,7 @@ public class GoodsController {
      * @return 商品分页集合
      */
     @GetMapping
-    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, @RequestParam(required = false) String name, @RequestParam(required = false) String sortType, @RequestParam(required = false) Integer orderType, @RequestParam(required = false) Long storeId, Integer page, Integer pageSize) {
+    public Result<PageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, @RequestParam(required = false) String name, @RequestParam(required = false) String sortType, @RequestParam(required = false) Integer orderType, @RequestParam(required = false) Long storeId, Integer page, Integer pageSize) {
         return goodsService.getHotOrNewGoods(type, isAll, name, sortType, orderType, storeId, page, pageSize);
     }
 
@@ -46,7 +46,7 @@ public class GoodsController {
      * @return
      */
     @GetMapping("/category/{id}")
-    public Result<GoodsPageResult<GoodsMessageVO>> getGoodsByCategoryId(@PathVariable Long id, Integer page, Integer pageSize) {
+    public Result<PageResult<GoodsMessageVO>> getGoodsByCategoryId(@PathVariable Long id, Integer page, Integer pageSize) {
         return goodsService.getGoodsByCategoryId(id, page, pageSize);
     }
 

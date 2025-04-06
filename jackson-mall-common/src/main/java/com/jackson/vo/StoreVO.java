@@ -1,7 +1,5 @@
 package com.jackson.vo;
 
-import com.jackson.result.GoodsPageResult;
-
 import java.io.Serializable;
 import java.util.Objects;
 

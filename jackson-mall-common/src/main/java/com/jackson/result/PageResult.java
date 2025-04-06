@@ -4,14 +4,14 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class GoodsPageResult<T> implements Serializable {
+public class PageResult<T> implements Serializable {
     private List<T> data;
-    private Boolean isRemain; // 是否剩余商品
+    private Boolean isRemain; // 是否剩余内容
 
-    public GoodsPageResult() {
+    public PageResult() {
     }
 
-    public GoodsPageResult(List<T> data, Boolean isRemain) {
+    public PageResult(List<T> data, Boolean isRemain) {
         this.data = data;
         this.isRemain = isRemain;
     }
@@ -36,7 +36,7 @@ public class GoodsPageResult<T> implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GoodsPageResult<?> that = (GoodsPageResult<?>) o;
+        PageResult<?> that = (PageResult<?>) o;
         return Objects.equals(data, that.data) && Objects.equals(isRemain, that.isRemain);
     }
 

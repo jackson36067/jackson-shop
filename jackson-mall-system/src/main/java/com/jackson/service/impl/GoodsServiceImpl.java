@@ -9,7 +9,7 @@ import com.jackson.context.BaseContext;
 import com.jackson.dto.MemberCollectGoodsDTO;
 import com.jackson.entity.*;
 import com.jackson.repository.*;
-import com.jackson.result.GoodsPageResult;
+import com.jackson.result.PageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
 import com.jackson.vo.CollectGoodsVO;
@@ -56,7 +56,7 @@ public class GoodsServiceImpl implements GoodsService {
      * @param pageSize  页码数量
      * @return 商品分页集合
      */
-    public Result<GoodsPageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, String name, String sortType, Integer orderType, Long storeId, Integer page, Integer pageSize) {
+    public Result<PageResult<GoodsMessageVO>> getHotOrNewGoods(Integer type, Boolean isAll, String name, String sortType, Integer orderType, Long storeId, Integer page, Integer pageSize) {
         // 封装可变条件 -> 判断条件是获取最新还是热销商品
         Specification<ShopGood> shopGoodSpecification = (root, query, cb) -> {
             // 用于暂时存放查询条件,存放到查询条件List中
@@ -121,7 +121,7 @@ public class GoodsServiceImpl implements GoodsService {
         List<GoodsMessageVO> goodsMessageVOList = shopGoodList.stream()
                 .map(shopGood -> BeanUtil.copyProperties(shopGood, GoodsMessageVO.class))
                 .toList();
-        GoodsPageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new GoodsPageResult<>(goodsMessageVOList, isRemain);
+        PageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new PageResult<>(goodsMessageVOList, isRemain);
         return Result.success(goodsMessageVOGoodsPageResult);
     }
 
@@ -133,7 +133,7 @@ public class GoodsServiceImpl implements GoodsService {
      * @param pageSize 页码
      * @return
      */
-    public Result<GoodsPageResult<GoodsMessageVO>> getGoodsByCategoryId(Long id, Integer page, Integer pageSize) {
+    public Result<PageResult<GoodsMessageVO>> getGoodsByCategoryId(Long id, Integer page, Integer pageSize) {
         Sort sort = Sort.by(Sort.Direction.ASC, GoodsConstant.SORT_COLUMN);
         PageRequest pageRequest = PageRequest.of(page, pageSize, sort);
         boolean isRemain = true;
@@ -145,7 +145,7 @@ public class GoodsServiceImpl implements GoodsService {
         List<GoodsMessageVO> goodsMessageVOList = shopGoodList.stream()
                 .map(shopGood -> BeanUtil.copyProperties(shopGood, GoodsMessageVO.class))
                 .toList();
-        GoodsPageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new GoodsPageResult<>(goodsMessageVOList, isRemain);
+        PageResult<GoodsMessageVO> goodsMessageVOGoodsPageResult = new PageResult<>(goodsMessageVOList, isRemain);
         return Result.success(goodsMessageVOGoodsPageResult);
     }
 
@@ -248,10 +248,11 @@ public class GoodsServiceImpl implements GoodsService {
         List<String> bannerList = JSONUtil.toList(shopGoods.getGallery(), String.class);
         goodsDetailVO.setGallery(bannerList);
         // 获取商品评论
-        // 设置好评,中评,差评,有图评论数量
+        // 设置总评价,好评,中评,差评,有图评论数量
         Integer goodsAllCommentCount = commentRepository.countByValueId(id);
         Integer goodCommentNumber = commentRepository.countByValueIdAndStar(id, CommentConstant.GOOD_COMMENT);
         Integer badCommentNumber = commentRepository.countByValueIdAndStar(id, CommentConstant.BAD_COMMENT);
+        goodsDetailVO.setTotalCommentNumber(goodsAllCommentCount);
         goodsDetailVO.setGoodCommentNumber(goodCommentNumber);
         // 中评使用该商品所有评论减去好评减去差评
         goodsDetailVO.setNaturalCommentNumber(goodsAllCommentCount - goodCommentNumber - badCommentNumber);
