@@ -12,10 +12,7 @@ import com.jackson.repository.*;
 import com.jackson.result.PageResult;
 import com.jackson.result.Result;
 import com.jackson.service.GoodsService;
-import com.jackson.vo.CollectGoodsVO;
-import com.jackson.vo.GoodsCommentVO;
-import com.jackson.vo.GoodsDetailVO;
-import com.jackson.vo.GoodsMessageVO;
+import com.jackson.vo.*;
 import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.Predicate;
@@ -294,6 +291,12 @@ public class GoodsServiceImpl implements GoodsService {
             // 省+市+区+详情地址
             goodsDetailVO.setDefaultAddress(memberDefaultAddress.getProvince() + memberDefaultAddress.getCity() + memberDefaultAddress.getCounty() + memberDefaultAddress.getAddressDetail());
         }
+        // 封装商品参数信息
+        List<GoodsAttributeVO> goodsAttributeList = shopGoods.getShopGoodsAttributeList()
+                .stream()
+                .map(shopGoodsAttribute -> BeanUtil.copyProperties(shopGoodsAttribute, GoodsAttributeVO.class))
+                .toList();
+        goodsDetailVO.setGoodsAttributeList(goodsAttributeList);
         return Result.success(goodsDetailVO);
     }
 }
