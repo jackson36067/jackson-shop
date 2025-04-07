@@ -113,10 +113,16 @@ public class ShopGood implements Serializable {
     @OneToMany(mappedBy = "shopGood")
     private List<ShopGoodsAttribute> shopGoodsAttributeList;
 
+    @OneToMany(mappedBy = "shopGood")
+    private List<ShopGoodsProduct> shopGoodsProductList;
+
+    @OneToMany(mappedBy = "shopGood")
+    private List<ShopGoodsSpecification> shopGoodsSpecificationList;
+
     public ShopGood() {
     }
 
-    public ShopGood(Long id, String goodsSn, String name, ShopCategory shopCategory, Long brandId, String gallery, String keywords, String brief, Boolean isOnSale, Integer sort, String picUrl, String shareUrl, Boolean isNew, Boolean isHot, String unit, BigDecimal counterPrice, BigDecimal retailPrice, Integer actualSales, Integer virtualSales, String detail, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopColumn> shopColumnList, List<ShopChannel> shopChannels, ShopStore shopStore, List<ShopGoodsAttribute> shopGoodsAttributeList) {
+    public ShopGood(Long id, String goodsSn, String name, ShopCategory shopCategory, Long brandId, String gallery, String keywords, String brief, Boolean isOnSale, Integer sort, String picUrl, String shareUrl, Boolean isNew, Boolean isHot, String unit, BigDecimal counterPrice, BigDecimal retailPrice, Integer actualSales, Integer virtualSales, String detail, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopColumn> shopColumnList, List<ShopChannel> shopChannels, ShopStore shopStore, List<ShopGoodsAttribute> shopGoodsAttributeList, List<ShopGoodsProduct> shopGoodsProductList, List<ShopGoodsSpecification> shopGoodsSpecificationList) {
         this.id = id;
         this.goodsSn = goodsSn;
         this.name = name;
@@ -144,6 +150,8 @@ public class ShopGood implements Serializable {
         this.shopChannels = shopChannels;
         this.shopStore = shopStore;
         this.shopGoodsAttributeList = shopGoodsAttributeList;
+        this.shopGoodsProductList = shopGoodsProductList;
+        this.shopGoodsSpecificationList = shopGoodsSpecificationList;
     }
 
     public Long getId() {
@@ -362,16 +370,32 @@ public class ShopGood implements Serializable {
         this.shopGoodsAttributeList = shopGoodsAttributeList;
     }
 
+    public List<ShopGoodsProduct> getShopGoodsProductList() {
+        return shopGoodsProductList;
+    }
+
+    public void setShopGoodsProductList(List<ShopGoodsProduct> shopGoodsProductList) {
+        this.shopGoodsProductList = shopGoodsProductList;
+    }
+
+    public List<ShopGoodsSpecification> getShopGoodsSpecificationList() {
+        return shopGoodsSpecificationList;
+    }
+
+    public void setShopGoodsSpecificationList(List<ShopGoodsSpecification> shopGoodsSpecificationList) {
+        this.shopGoodsSpecificationList = shopGoodsSpecificationList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ShopGood shopGood = (ShopGood) o;
-        return Objects.equals(id, shopGood.id) && Objects.equals(goodsSn, shopGood.goodsSn) && Objects.equals(name, shopGood.name) && Objects.equals(shopCategory, shopGood.shopCategory) && Objects.equals(brandId, shopGood.brandId) && Objects.equals(gallery, shopGood.gallery) && Objects.equals(keywords, shopGood.keywords) && Objects.equals(brief, shopGood.brief) && Objects.equals(isOnSale, shopGood.isOnSale) && Objects.equals(sort, shopGood.sort) && Objects.equals(picUrl, shopGood.picUrl) && Objects.equals(shareUrl, shopGood.shareUrl) && Objects.equals(isNew, shopGood.isNew) && Objects.equals(isHot, shopGood.isHot) && Objects.equals(unit, shopGood.unit) && Objects.equals(counterPrice, shopGood.counterPrice) && Objects.equals(retailPrice, shopGood.retailPrice) && Objects.equals(actualSales, shopGood.actualSales) && Objects.equals(virtualSales, shopGood.virtualSales) && Objects.equals(detail, shopGood.detail) && Objects.equals(createTime, shopGood.createTime) && Objects.equals(updateTime, shopGood.updateTime) && Objects.equals(delFlag, shopGood.delFlag) && Objects.equals(shopColumnList, shopGood.shopColumnList) && Objects.equals(shopChannels, shopGood.shopChannels) && Objects.equals(shopStore, shopGood.shopStore) && Objects.equals(shopGoodsAttributeList, shopGood.shopGoodsAttributeList);
+        return Objects.equals(id, shopGood.id) && Objects.equals(goodsSn, shopGood.goodsSn) && Objects.equals(name, shopGood.name) && Objects.equals(shopCategory, shopGood.shopCategory) && Objects.equals(brandId, shopGood.brandId) && Objects.equals(gallery, shopGood.gallery) && Objects.equals(keywords, shopGood.keywords) && Objects.equals(brief, shopGood.brief) && Objects.equals(isOnSale, shopGood.isOnSale) && Objects.equals(sort, shopGood.sort) && Objects.equals(picUrl, shopGood.picUrl) && Objects.equals(shareUrl, shopGood.shareUrl) && Objects.equals(isNew, shopGood.isNew) && Objects.equals(isHot, shopGood.isHot) && Objects.equals(unit, shopGood.unit) && Objects.equals(counterPrice, shopGood.counterPrice) && Objects.equals(retailPrice, shopGood.retailPrice) && Objects.equals(actualSales, shopGood.actualSales) && Objects.equals(virtualSales, shopGood.virtualSales) && Objects.equals(detail, shopGood.detail) && Objects.equals(createTime, shopGood.createTime) && Objects.equals(updateTime, shopGood.updateTime) && Objects.equals(delFlag, shopGood.delFlag) && Objects.equals(shopColumnList, shopGood.shopColumnList) && Objects.equals(shopChannels, shopGood.shopChannels) && Objects.equals(shopStore, shopGood.shopStore) && Objects.equals(shopGoodsAttributeList, shopGood.shopGoodsAttributeList) && Objects.equals(shopGoodsProductList, shopGood.shopGoodsProductList) && Objects.equals(shopGoodsSpecificationList, shopGood.shopGoodsSpecificationList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, goodsSn, name, shopCategory, brandId, gallery, keywords, brief, isOnSale, sort, picUrl, shareUrl, isNew, isHot, unit, counterPrice, retailPrice, actualSales, virtualSales, detail, createTime, updateTime, delFlag, shopColumnList, shopChannels, shopStore, shopGoodsAttributeList);
+        return Objects.hash(id, goodsSn, name, shopCategory, brandId, gallery, keywords, brief, isOnSale, sort, picUrl, shareUrl, isNew, isHot, unit, counterPrice, retailPrice, actualSales, virtualSales, detail, createTime, updateTime, delFlag, shopColumnList, shopChannels, shopStore, shopGoodsAttributeList, shopGoodsProductList, shopGoodsSpecificationList);
     }
 
     @Override
@@ -404,6 +428,8 @@ public class ShopGood implements Serializable {
                 ", shopChannels=" + shopChannels +
                 ", shopStore=" + shopStore +
                 ", shopGoodsAttributeList=" + shopGoodsAttributeList +
+                ", shopGoodsProductList=" + shopGoodsProductList +
+                ", shopGoodsSpecificationList=" + shopGoodsSpecificationList +
                 '}';
     }
 }

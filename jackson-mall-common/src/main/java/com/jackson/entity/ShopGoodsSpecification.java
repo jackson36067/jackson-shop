@@ -7,22 +7,24 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "shop_goods_attribute")
-public class ShopGoodsAttribute {
+@Table(name = "shop_goods_specification")
+public class ShopGoodsSpecification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private Integer id;
 
-//    @ColumnDefault("0")
-//    @Column(name = "goods_id", nullable = false)
-//    private Long goodsId;
+    @ColumnDefault("''")
+    @Column(name = "specification", nullable = false)
+    private String specification;
 
-    @Column(name = "attribute", nullable = false)
-    private String attribute;
-
+    @ColumnDefault("''")
     @Column(name = "value", nullable = false)
     private String value;
+
+    @ColumnDefault("''")
+    @Column(name = "pic_url", nullable = false)
+    private String picUrl;
 
     @Column(name = "create_time")
     private LocalDateTime createTime;
@@ -38,34 +40,34 @@ public class ShopGoodsAttribute {
     @JoinColumn(name = "goods_id",referencedColumnName = "id")
     private ShopGood shopGood;
 
-    public ShopGoodsAttribute() {
+    public ShopGoodsSpecification() {
     }
 
-    public ShopGoodsAttribute(Long id, String attribute, String value, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag,ShopGood shopGood) {
+    public ShopGoodsSpecification(String specification, Integer id, String value, String picUrl, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, ShopGood shopGood) {
+        this.specification = specification;
         this.id = id;
-        this.attribute = attribute;
         this.value = value;
+        this.picUrl = picUrl;
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.delFlag = delFlag;
         this.shopGood = shopGood;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-
-    public String getAttribute() {
-        return attribute;
+    public String getSpecification() {
+        return specification;
     }
 
-    public void setAttribute(String attribute) {
-        this.attribute = attribute;
+    public void setSpecification(String specification) {
+        this.specification = specification;
     }
 
     public String getValue() {
@@ -74,6 +76,14 @@ public class ShopGoodsAttribute {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getPicUrl() {
+        return picUrl;
+    }
+
+    public void setPicUrl(String picUrl) {
+        this.picUrl = picUrl;
     }
 
     public LocalDateTime getCreateTime() {
@@ -111,21 +121,22 @@ public class ShopGoodsAttribute {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        ShopGoodsAttribute that = (ShopGoodsAttribute) o;
-        return Objects.equals(id, that.id) && Objects.equals(attribute, that.attribute) && Objects.equals(value, that.value) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag) && Objects.equals(shopGood, that.shopGood);
+        ShopGoodsSpecification that = (ShopGoodsSpecification) o;
+        return Objects.equals(id, that.id) && Objects.equals(specification, that.specification) && Objects.equals(value, that.value) && Objects.equals(picUrl, that.picUrl) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag) && Objects.equals(shopGood, that.shopGood);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, attribute, value, createTime, updateTime, delFlag, shopGood);
+        return Objects.hash(id, specification, value, picUrl, createTime, updateTime, delFlag, shopGood);
     }
 
     @Override
     public String toString() {
-        return "ShopGoodsAttribute{" +
+        return "ShopGoodsSpecification{" +
                 "id=" + id +
-                ", attribute='" + attribute + '\'' +
+                ", specification='" + specification + '\'' +
                 ", value='" + value + '\'' +
+                ", picUrl='" + picUrl + '\'' +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", delFlag=" + delFlag +

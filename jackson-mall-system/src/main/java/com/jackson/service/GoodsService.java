@@ -6,6 +6,7 @@ import com.jackson.result.Result;
 import com.jackson.vo.CollectGoodsVO;
 import com.jackson.vo.GoodsDetailVO;
 import com.jackson.vo.GoodsMessageVO;
+import com.jackson.vo.GoodsSkuVO;
 
 import java.util.List;
 
@@ -19,4 +20,6 @@ public interface GoodsService {
     Result<List<CollectGoodsVO>> getCollectGoodsList(String name, Integer sortType, Integer collectTime);
 
     Result<GoodsDetailVO> getGoodsDetail(Long id);
+
+    Result<GoodsSkuVO> getGoodsSkuInfo(Long id);
 }

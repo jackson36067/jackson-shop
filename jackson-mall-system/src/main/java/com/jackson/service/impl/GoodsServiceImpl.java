@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class GoodsServiceImpl implements GoodsService {
@@ -298,5 +300,50 @@ public class GoodsServiceImpl implements GoodsService {
                 .toList();
         goodsDetailVO.setGoodsAttributeList(goodsAttributeList);
         return Result.success(goodsDetailVO);
+    }
+
+    /**
+     * 获取商品规格信息
+     *
+     * @param id 商品id
+     * @return
+     */
+    public Result<GoodsSkuVO> getGoodsSkuInfo(Long id) {
+        ShopGood shopGood = goodsRepository.findById(id).get();
+        // 封装商品sku信息
+        List<GoodsProductVO> goodsProductList = shopGood.getShopGoodsProductList()
+                .stream()
+                .map(shopGoodsProduct -> {
+                    GoodsProductVO goodsProductVO = BeanUtil.copyProperties(shopGoodsProduct, GoodsProductVO.class);
+                    // 将商品所有属性以及值转化为map格式,比如 "颜色":"绿色"
+                    Map<String, String> specs = JSONUtil.toBean(shopGoodsProduct.getSpecifications(), Map.class);
+                    goodsProductVO.setSpecs(specs);
+                    return goodsProductVO;
+                })
+                .toList();
+        // 获取商品的所有规格, 然后按照规格名称进行分组
+        Map<String, List<ShopGoodsSpecification>> goodsSpecificationMap = shopGood.getShopGoodsSpecificationList()
+                .stream()
+                .collect(Collectors.groupingBy(ShopGoodsSpecification::getSpecification));
+        List<GoodsSpecificationVO> goodsSpecificationList = new ArrayList<>();
+        // 遍历map集合得到该商品有多少种规格,按照规格返回数据(比如规格名称,规格下的选项,图片等)
+        goodsSpecificationMap.keySet().forEach(str -> {
+            GoodsSpecificationVO goodsSpecificationVO = new GoodsSpecificationVO();
+            goodsSpecificationVO.setName(str);
+            List<ShopGoodsSpecification> shopGoodsSpecifications = goodsSpecificationMap.get(str);
+            List<GoodsSpecificationValueVO> goodsSpecificationValueList = shopGoodsSpecifications
+                    .stream()
+                    .map(shopGoodsSpecification -> {
+                        GoodsSpecificationValueVO goodsSpecificationValueVO = new GoodsSpecificationValueVO();
+                        goodsSpecificationValueVO.setValue(shopGoodsSpecification.getValue());
+                        goodsSpecificationValueVO.setPicUrl(shopGoodsSpecification.getPicUrl());
+                        return goodsSpecificationValueVO;
+                    })
+                    .toList();
+            goodsSpecificationVO.setOptions(goodsSpecificationValueList);
+            goodsSpecificationList.add(goodsSpecificationVO);
+        });
+        GoodsSkuVO goodsSkuVO = new GoodsSkuVO(goodsSpecificationList, goodsProductList);
+        return Result.success(goodsSkuVO);
     }
 }

@@ -7,7 +7,9 @@ import com.jackson.service.GoodsService;
 import com.jackson.vo.CollectGoodsVO;
 import com.jackson.vo.GoodsDetailVO;
 import com.jackson.vo.GoodsMessageVO;
+import com.jackson.vo.GoodsSkuVO;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -81,5 +83,15 @@ public class GoodsController {
     @GetMapping("/detail/{id}")
     public Result<GoodsDetailVO> getGoodsById(@PathVariable Long id) {
         return goodsService.getGoodsDetail(id);
+    }
+
+    /**
+     * 获取商品规格信息
+     * @param id 商品id
+     * @return
+     */
+    @GetMapping("/sku/{id}")
+    public Result<GoodsSkuVO> getGoodsSku(@PathVariable Long id) {
+        return goodsService.getGoodsSkuInfo(id);
     }
 }
