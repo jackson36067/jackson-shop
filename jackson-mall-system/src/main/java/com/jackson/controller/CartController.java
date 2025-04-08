@@ -1,6 +1,7 @@
 package com.jackson.controller;
 
 
+import com.jackson.dto.CartDTO;
 import com.jackson.dto.UpdateGoodsCheckedDTO;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
@@ -45,5 +46,14 @@ public class CartController {
     @DeleteMapping("/{id}")
     public void doRemoveGoodsFromCart(@PathVariable Long id) {
         cartService.removeGoodsFromCart(id);
+    }
+
+    /**
+     * 新增商品至购物车中
+     * @param cartDTO 商品信息
+     */
+    @PostMapping("/add")
+    public void addGoodsToCart(@RequestBody CartDTO cartDTO){
+        cartService.addGoodsToCart(cartDTO);
     }
 }

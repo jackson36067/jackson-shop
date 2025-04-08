@@ -3,13 +3,13 @@ package com.jackson.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.jackson.context.BaseContext;
+import com.jackson.dto.CartDTO;
 import com.jackson.entity.*;
 import com.jackson.repository.*;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
 import com.jackson.vo.CartGoodsVO;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ public class CartServiceImpl implements CartService {
     private MemberCollectGoodsRepository memberCollectGoodsRepository;
     @Resource
     private MemberCouponRepository memberCouponRepository;
-    @Autowired
+    @Resource
     private MemberFollowStoreRepository memberFollowStoreRepository;
 
     /**
@@ -58,7 +58,7 @@ public class CartServiceImpl implements CartService {
                             ShopStore shopStore = shopGood.getShopStore();
                             cartGoodsVO.setStoreId(shopStore.getId());
                             cartGoodsVO.setStoreName(shopStore.getName());
-                            cartGoodsVO.setIsFollow(memberFollowStoreRepository.existsByMemberIdAndStoreId(userId,shopStore.getId()));
+                            cartGoodsVO.setIsFollow(memberFollowStoreRepository.existsByMemberIdAndStoreId(userId, shopStore.getId()));
                             // 判断店家是否提供优惠卷 -> 从优惠卷数据库中判断该店家是否有提供优惠卷以及这些优惠卷用户是否已经领取
                             List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStore_IdAndExpireTimeAfter(shopGood.getShopStore().getId(), LocalDateTime.now());
                             // 用户是否有可领取的优惠卷
@@ -73,7 +73,7 @@ public class CartServiceImpl implements CartService {
                             }
                             cartGoodsVO.setIsContainCoupon(!shopCouponList.isEmpty() && isUserGet.get());
                             // 判断用户是否收藏了商品
-                            cartGoodsVO.setIsCollect(memberCollectGoodsRepository.existsByMemberIdAndGoodsId(userId,shopCart.getGoodsId()));
+                            cartGoodsVO.setIsCollect(memberCollectGoodsRepository.existsByMemberIdAndGoodsId(userId, shopCart.getGoodsId()));
                             return cartGoodsVO;
                         }
                 )
@@ -90,7 +90,6 @@ public class CartServiceImpl implements CartService {
      * @return
      */
     public void doCheckedCartGoods(List<Long> ids, Boolean checked, Short number) {
-
         // 判断修改商品的选中状态还是数量
         if (checked != null) {
             // 修改选中状态 -> 可能有多个商品
@@ -112,5 +111,36 @@ public class CartServiceImpl implements CartService {
      */
     public void removeGoodsFromCart(Long id) {
         cartRepository.deleteById(id);
+    }
+
+    /**
+     * 新增商品至购物车中
+     *
+     * @param cartDTO 商品信息
+     */
+    public void addGoodsToCart(CartDTO cartDTO) {
+        // 判断该商品是否已经在购物车中存在, 通过商品id以及商品skuId获取
+        ShopCart shopCart = cartRepository.findByGoodsIdAndProductId(cartDTO.getGoodsId(), cartDTO.getProductId());
+        if (shopCart != null) {
+            // 购物车中已经加入了该商品, 那么将该商品的数量添加即可
+            shopCart.setNumber((short) (cartDTO.getNumber() + shopCart.getNumber()));
+            cartRepository.saveAndFlush(shopCart);
+        } else {
+            shopCart = new ShopCart();
+            shopCart.setGoodsId(cartDTO.getGoodsId());
+            shopCart.setGoodsName(cartDTO.getGoodsName());
+            shopCart.setGoodsSn(cartDTO.getGoodsSn());
+            shopCart.setPrice(cartDTO.getPrice());
+            shopCart.setNumber(cartDTO.getNumber());
+            shopCart.setProductId(cartDTO.getProductId());
+            shopCart.setPicUrl(cartDTO.getPicUrl());
+            shopCart.setChecked(false);
+            shopCart.setUserId(BaseContext.getCurrentId());
+            shopCart.setDelFlag(false);
+            String spec = JSONUtil.toJsonStr(cartDTO.getSpecification());
+            shopCart.setSpecifications(spec);
+            shopCart.setRemark(cartDTO.getRemark());
+            cartRepository.save(shopCart);
+        }
     }
 }

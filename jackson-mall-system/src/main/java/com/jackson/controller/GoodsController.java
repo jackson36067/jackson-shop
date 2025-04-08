@@ -84,14 +84,4 @@ public class GoodsController {
     public Result<GoodsDetailVO> getGoodsById(@PathVariable Long id) {
         return goodsService.getGoodsDetail(id);
     }
-
-    /**
-     * 获取商品规格信息
-     * @param id 商品id
-     * @return
-     */
-    @GetMapping("/sku/{id}")
-    public Result<GoodsSkuVO> getGoodsSku(@PathVariable Long id) {
-        return goodsService.getGoodsSkuInfo(id);
-    }
 }

@@ -1,5 +1,6 @@
 package com.jackson.service;
 
+import com.jackson.dto.CartDTO;
 import com.jackson.result.Result;
 import com.jackson.vo.CartGoodsVO;
 
@@ -11,4 +12,6 @@ public interface CartService {
     void doCheckedCartGoods(List<Long> ids, Boolean checked, Short number);
 
     void removeGoodsFromCart(Long id);
+
+    void addGoodsToCart(CartDTO cartDTO);
 }

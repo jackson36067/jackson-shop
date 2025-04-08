@@ -2,6 +2,9 @@ package com.jackson.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -10,6 +13,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "shop_cart")
+@EntityListeners(AuditingEntityListener.class)
 public class ShopCart implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,9 +57,11 @@ public class ShopCart implements Serializable {
     private String remark;
 
     @Column(name = "create_time")
+    @CreatedDate
     private LocalDateTime createTime;
 
     @Column(name = "update_time")
+    @LastModifiedDate
     private LocalDateTime updateTime;
 
     @ColumnDefault("0")

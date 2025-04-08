@@ -233,7 +233,7 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     /**
-     * 根据商品id获取地址详情
+     * 根据商品id获取商品详情
      *
      * @param id 商品id
      * @return 商品详情对象
@@ -299,19 +299,8 @@ public class GoodsServiceImpl implements GoodsService {
                 .map(shopGoodsAttribute -> BeanUtil.copyProperties(shopGoodsAttribute, GoodsAttributeVO.class))
                 .toList();
         goodsDetailVO.setGoodsAttributeList(goodsAttributeList);
-        return Result.success(goodsDetailVO);
-    }
-
-    /**
-     * 获取商品规格信息
-     *
-     * @param id 商品id
-     * @return
-     */
-    public Result<GoodsSkuVO> getGoodsSkuInfo(Long id) {
-        ShopGood shopGood = goodsRepository.findById(id).get();
-        // 封装商品sku信息
-        List<GoodsProductVO> goodsProductList = shopGood.getShopGoodsProductList()
+        // 封装商品sku产品信息
+        List<GoodsProductVO> goodsProductList = shopGoods.getShopGoodsProductList()
                 .stream()
                 .map(shopGoodsProduct -> {
                     GoodsProductVO goodsProductVO = BeanUtil.copyProperties(shopGoodsProduct, GoodsProductVO.class);
@@ -321,8 +310,10 @@ public class GoodsServiceImpl implements GoodsService {
                     return goodsProductVO;
                 })
                 .toList();
+        goodsDetailVO.setGoodsProductList(goodsProductList);
+        // 封装商品规格信息
         // 获取商品的所有规格, 然后按照规格名称进行分组
-        Map<String, List<ShopGoodsSpecification>> goodsSpecificationMap = shopGood.getShopGoodsSpecificationList()
+        Map<String, List<ShopGoodsSpecification>> goodsSpecificationMap = shopGoods.getShopGoodsSpecificationList()
                 .stream()
                 .collect(Collectors.groupingBy(ShopGoodsSpecification::getSpecification));
         List<GoodsSpecificationVO> goodsSpecificationList = new ArrayList<>();
@@ -343,7 +334,7 @@ public class GoodsServiceImpl implements GoodsService {
             goodsSpecificationVO.setOptions(goodsSpecificationValueList);
             goodsSpecificationList.add(goodsSpecificationVO);
         });
-        GoodsSkuVO goodsSkuVO = new GoodsSkuVO(goodsSpecificationList, goodsProductList);
-        return Result.success(goodsSkuVO);
+        goodsDetailVO.setGoodsSpecificationList(goodsSpecificationList);
+        return Result.success(goodsDetailVO);
     }
 }

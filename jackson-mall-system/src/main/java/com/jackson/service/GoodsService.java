@@ -20,6 +20,4 @@ public interface GoodsService {
     Result<List<CollectGoodsVO>> getCollectGoodsList(String name, Integer sortType, Integer collectTime);
 
     Result<GoodsDetailVO> getGoodsDetail(Long id);
-
-    Result<GoodsSkuVO> getGoodsSkuInfo(Long id);
 }

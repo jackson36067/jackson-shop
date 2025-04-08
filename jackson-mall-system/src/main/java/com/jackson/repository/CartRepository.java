@@ -16,4 +16,6 @@ public interface CartRepository extends JpaRepository<ShopCart, Long> {
     @Modifying
     @Query("update ShopCart s set s.checked = :checked where s.id in :ids")
     void updateAllByIdIn(List<Long> ids,Boolean checked);
+
+    ShopCart findByGoodsIdAndProductId(Long goodsId,Long productId);
 }
