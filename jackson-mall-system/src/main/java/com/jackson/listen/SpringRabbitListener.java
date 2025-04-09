@@ -1,7 +1,5 @@
 package com.jackson.listen;
 
-import cn.hutool.core.bean.BeanUtil;
-import com.jackson.constant.BrowseHistoryConstant;
 import com.jackson.constant.RabbitMQConstant;
 import com.jackson.entity.ShopCoupon;
 import com.jackson.entity.ShopMemberBrowseHistory;
@@ -17,6 +15,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -48,6 +47,11 @@ public class SpringRabbitListener {
         memberFollowStoreRepository.save(shopMemberFollowStore);
     }
 
+    /**
+     * 监听browse_queue的消息,将用户的浏览记录保存
+     *
+     * @param info 用户的浏览信息
+     */
     @RabbitListener(queues = RabbitMQConstant.BROWSE_QUEUE_KEY)
     private void listenMemberBrowseStore(Map<String, Long> info) {
         Long userId = info.get("memberId");
@@ -57,19 +61,47 @@ public class SpringRabbitListener {
         Long type = info.get("type");
         ShopMemberBrowseHistory shopMemberBrowseHistory = new ShopMemberBrowseHistory();
         shopMemberBrowseHistory.setMemberId(userId);
+        shopMemberBrowseHistory.setType(Short.parseShort(type.toString()));
+        // 如果今天已经访问过了该商品或者店铺或者评论,那么修改该信息的浏览时间即可
         if (storeId != null) {
-            shopMemberBrowseHistory.setStoreId(storeId);
+            // 判断在这次访问之前, 今天是否已经访问了该时间
+            ShopMemberBrowseHistory shopMemberBrowseHistory1 = memberBrowseHistoryRepository.findByStoreIdAndMemberIdAndBrowseTimeBetween(storeId, userId, LocalDate.now().atStartOfDay(), LocalDateTime.now());
+            if (shopMemberBrowseHistory1 != null) {
+                shopMemberBrowseHistory1.setBrowseTime(LocalDateTime.now());
+                memberBrowseHistoryRepository.saveAndFlush(shopMemberBrowseHistory1);
+                return;
+            } else {
+                // 没有 -> 则设置地址
+                shopMemberBrowseHistory.setStoreId(storeId);
+            }
         }
         if (goodsId != null) {
-            shopMemberBrowseHistory.setGoodsId(goodsId);
+            ShopMemberBrowseHistory shopMemberBrowseHistory1= memberBrowseHistoryRepository.findByGoodsIdAndMemberIdAndBrowseTimeBetween(goodsId, userId, LocalDate.now().atStartOfDay(), LocalDateTime.now());
+            if (shopMemberBrowseHistory1 != null) {
+                shopMemberBrowseHistory1.setBrowseTime(LocalDateTime.now());
+                memberBrowseHistoryRepository.saveAndFlush(shopMemberBrowseHistory1);
+                return;
+            } else {
+                shopMemberBrowseHistory.setGoodsId(goodsId);
+            }
         }
         if (commentId != null) {
-            shopMemberBrowseHistory.setCommentId(commentId);
+            ShopMemberBrowseHistory shopMemberBrowseHistory1 = memberBrowseHistoryRepository.findByCommentIdAndMemberIdAndBrowseTimeBetween(commentId, userId, LocalDate.now().atStartOfDay(), LocalDateTime.now());
+            if (shopMemberBrowseHistory1 != null) {
+                shopMemberBrowseHistory1.setBrowseTime(LocalDateTime.now());
+                memberBrowseHistoryRepository.saveAndFlush(shopMemberBrowseHistory1);
+            } else {
+                shopMemberBrowseHistory.setCommentId(commentId);
+            }
         }
-        shopMemberBrowseHistory.setType(Short.parseShort(type.toString()));
         memberBrowseHistoryRepository.save(shopMemberBrowseHistory);
     }
 
+    /**
+     * 监听coupon_queue的消息, 对优惠卷进行操作
+     *
+     * @param info
+     */
     @RabbitListener(queues = RabbitMQConstant.COUPON_QUEUE)
     private void listenBuyCoupon(Map<String, Long> info) {
         Long userId = info.get("userId");

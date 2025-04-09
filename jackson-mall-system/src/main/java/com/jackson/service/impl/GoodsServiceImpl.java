@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.jackson.constant.CommentConstant;
 import com.jackson.constant.GoodsConstant;
+import com.jackson.constant.RabbitMQConstant;
 import com.jackson.constant.StoreConstant;
 import com.jackson.context.BaseContext;
 import com.jackson.dto.MemberCollectGoodsDTO;
@@ -16,6 +17,7 @@ import com.jackson.vo.*;
 import io.netty.util.internal.StringUtil;
 import jakarta.annotation.Resource;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +44,8 @@ public class GoodsServiceImpl implements GoodsService {
     private MemberRepository memberRepository;
     @Resource
     private AddressRepository addressRepository;
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 根据条件获取商品
@@ -290,8 +295,16 @@ public class GoodsServiceImpl implements GoodsService {
             goodsDetailVO.setIsCollect(isCollect);
             // 设置默认收货地址
             ShopAddress memberDefaultAddress = addressRepository.findByIsDefaultAndMemberId((short) 0, memberId);
-            // 省+市+区+详情地址
-            goodsDetailVO.setDefaultAddress(memberDefaultAddress.getProvince() + memberDefaultAddress.getCity() + memberDefaultAddress.getCounty() + memberDefaultAddress.getAddressDetail());
+            if(memberDefaultAddress != null) {
+                // 设置默认地址id
+                goodsDetailVO.setDefaultAddressId(memberDefaultAddress.getId());
+                // 省+市+区+详情地址
+                goodsDetailVO.setDefaultAddress(memberDefaultAddress.getProvince() + memberDefaultAddress.getCity() + memberDefaultAddress.getCounty() + memberDefaultAddress.getAddressDetail());
+                // 设置默认收货人
+                goodsDetailVO.setConsignee(memberDefaultAddress.getName());
+                // 设置默认收货人电话号码
+                goodsDetailVO.setTel(memberDefaultAddress.getTel());
+            }
         }
         // 封装商品参数信息
         List<GoodsAttributeVO> goodsAttributeList = shopGoods.getShopGoodsAttributeList()
@@ -335,6 +348,12 @@ public class GoodsServiceImpl implements GoodsService {
             goodsSpecificationList.add(goodsSpecificationVO);
         });
         goodsDetailVO.setGoodsSpecificationList(goodsSpecificationList);
+        // 异步保存用户浏览商品记录
+        Map<String,Long> userBrowseGoodsInfo = new HashMap<>();
+        userBrowseGoodsInfo.put("memberId", memberId);
+        userBrowseGoodsInfo.put("type",0L);
+        userBrowseGoodsInfo.put("goodsId",id);
+        rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY,userBrowseGoodsInfo);
         return Result.success(goodsDetailVO);
     }
 }

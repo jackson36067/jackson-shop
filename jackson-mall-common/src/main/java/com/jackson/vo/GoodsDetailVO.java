@@ -22,7 +22,10 @@ public class GoodsDetailVO implements Serializable {
     private Integer naturalCommentNumber; // 中评数量
     private Integer badCommentNumber; // 差评数量
     private Integer hasPictureCommentNumber; // 有图评论数量
-    private String defaultAddress;
+    private Long defaultAddressId;
+    private String defaultAddress; // 默认收货地址
+    private String tel; // 默认收货电话号码
+    private String consignee; // 默认收货人
     private List<GoodsAttributeVO> goodsAttributeList;
     private List<GoodsSpecificationVO> goodsSpecificationList;
     private List<GoodsProductVO> goodsProductList;
@@ -30,7 +33,7 @@ public class GoodsDetailVO implements Serializable {
     public GoodsDetailVO() {
     }
 
-    public GoodsDetailVO(String name, String goodsSn, Long id, Long shopId, String brief, List<String> gallery, BigDecimal counterPrice, BigDecimal retailPrice, String detail, Boolean isCollect, List<GoodsCommentVO> goodsCommentVOList, Integer totalCommentNumber, Integer goodCommentNumber, Integer naturalCommentNumber, Integer badCommentNumber, Integer hasPictureCommentNumber, String defaultAddress, List<GoodsAttributeVO> goodsAttributeList, List<GoodsSpecificationVO> goodsSpecificationList, List<GoodsProductVO> goodsProductList) {
+    public GoodsDetailVO(String name, String goodsSn, Long id, Long shopId, String brief, List<String> gallery, BigDecimal counterPrice, BigDecimal retailPrice, String detail, Boolean isCollect, List<GoodsCommentVO> goodsCommentVOList, Integer totalCommentNumber, Integer goodCommentNumber, Integer naturalCommentNumber, Integer badCommentNumber, Integer hasPictureCommentNumber, Long defaultAddressId, String defaultAddress, String tel, String consignee, List<GoodsAttributeVO> goodsAttributeList, List<GoodsSpecificationVO> goodsSpecificationList, List<GoodsProductVO> goodsProductList) {
         this.name = name;
         this.id = id;
         this.goodsSn = goodsSn;
@@ -47,7 +50,10 @@ public class GoodsDetailVO implements Serializable {
         this.naturalCommentNumber = naturalCommentNumber;
         this.badCommentNumber = badCommentNumber;
         this.hasPictureCommentNumber = hasPictureCommentNumber;
+        this.defaultAddressId = defaultAddressId;
         this.defaultAddress = defaultAddress;
+        this.tel = tel;
+        this.consignee = consignee;
         this.goodsAttributeList = goodsAttributeList;
         this.goodsSpecificationList = goodsSpecificationList;
         this.goodsProductList = goodsProductList;
@@ -173,12 +179,36 @@ public class GoodsDetailVO implements Serializable {
         this.hasPictureCommentNumber = hasPictureCommentNumber;
     }
 
+    public Long getDefaultAddressId() {
+        return defaultAddressId;
+    }
+
+    public void setDefaultAddressId(Long defaultAddressId) {
+        this.defaultAddressId = defaultAddressId;
+    }
+
     public String getDefaultAddress() {
         return defaultAddress;
     }
 
     public void setDefaultAddress(String defaultAddress) {
         this.defaultAddress = defaultAddress;
+    }
+
+    public String getTel() {
+        return tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
+    }
+
+    public String getConsignee() {
+        return consignee;
+    }
+
+    public void setConsignee(String consignee) {
+        this.consignee = consignee;
     }
 
     public List<GoodsCommentVO> getGoodsCommentVOList() {
@@ -217,12 +247,12 @@ public class GoodsDetailVO implements Serializable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         GoodsDetailVO that = (GoodsDetailVO) o;
-        return Objects.equals(id, that.id) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(storeId, that.storeId) && Objects.equals(name, that.name) && Objects.equals(brief, that.brief) && Objects.equals(gallery, that.gallery) && Objects.equals(counterPrice, that.counterPrice) && Objects.equals(retailPrice, that.retailPrice) && Objects.equals(detail, that.detail) && Objects.equals(isCollect, that.isCollect) && Objects.equals(goodsCommentVOList, that.goodsCommentVOList) && Objects.equals(totalCommentNumber, that.totalCommentNumber) && Objects.equals(goodCommentNumber, that.goodCommentNumber) && Objects.equals(naturalCommentNumber, that.naturalCommentNumber) && Objects.equals(badCommentNumber, that.badCommentNumber) && Objects.equals(hasPictureCommentNumber, that.hasPictureCommentNumber) && Objects.equals(defaultAddress, that.defaultAddress) && Objects.equals(goodsAttributeList, that.goodsAttributeList) && Objects.equals(goodsSpecificationList, that.goodsSpecificationList) && Objects.equals(goodsProductList, that.goodsProductList);
+        return Objects.equals(id, that.id) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(storeId, that.storeId) && Objects.equals(name, that.name) && Objects.equals(brief, that.brief) && Objects.equals(gallery, that.gallery) && Objects.equals(counterPrice, that.counterPrice) && Objects.equals(retailPrice, that.retailPrice) && Objects.equals(detail, that.detail) && Objects.equals(isCollect, that.isCollect) && Objects.equals(goodsCommentVOList, that.goodsCommentVOList) && Objects.equals(totalCommentNumber, that.totalCommentNumber) && Objects.equals(goodCommentNumber, that.goodCommentNumber) && Objects.equals(naturalCommentNumber, that.naturalCommentNumber) && Objects.equals(badCommentNumber, that.badCommentNumber) && Objects.equals(hasPictureCommentNumber, that.hasPictureCommentNumber) && Objects.equals(defaultAddressId, that.defaultAddressId) && Objects.equals(defaultAddress, that.defaultAddress) && Objects.equals(tel, that.tel) && Objects.equals(consignee, that.consignee) && Objects.equals(goodsAttributeList, that.goodsAttributeList) && Objects.equals(goodsSpecificationList, that.goodsSpecificationList) && Objects.equals(goodsProductList, that.goodsProductList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, goodsSn, storeId, name, brief, gallery, counterPrice, retailPrice, detail, isCollect, goodsCommentVOList, totalCommentNumber, goodCommentNumber, naturalCommentNumber, badCommentNumber, hasPictureCommentNumber, defaultAddress, goodsAttributeList, goodsSpecificationList, goodsProductList);
+        return Objects.hash(id, goodsSn, storeId, name, brief, gallery, counterPrice, retailPrice, detail, isCollect, goodsCommentVOList, totalCommentNumber, goodCommentNumber, naturalCommentNumber, badCommentNumber, hasPictureCommentNumber, defaultAddressId, defaultAddress, tel, consignee, goodsAttributeList, goodsSpecificationList, goodsProductList);
     }
 
     @Override
@@ -244,7 +274,10 @@ public class GoodsDetailVO implements Serializable {
                 ", naturalCommentNumber=" + naturalCommentNumber +
                 ", badCommentNumber=" + badCommentNumber +
                 ", hasPictureCommentNumber=" + hasPictureCommentNumber +
+                ", defaultAddressId=" + defaultAddressId +
                 ", defaultAddress='" + defaultAddress + '\'' +
+                ", tel='" + tel + '\'' +
+                ", consignee='" + consignee + '\'' +
                 ", goodsAttributeList=" + goodsAttributeList +
                 ", goodsSpecificationList=" + goodsSpecificationList +
                 ", goodsProductList=" + goodsProductList +

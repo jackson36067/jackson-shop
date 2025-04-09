@@ -13,4 +13,13 @@ public interface MemberBrowseHistoryRepository extends JpaRepository<ShopMemberB
     List<ShopMemberBrowseHistory> findAllByMemberIdAndTypeAndBrowseTimeBefore(@Param("memberId") Long memberId,
                                                                               @Param("type") Short type,
                                                                               @Param("begin") LocalDateTime begin);
+
+    // 获取一段时间内用户访问的某个商品
+    ShopMemberBrowseHistory findByGoodsIdAndMemberIdAndBrowseTimeBetween(Long goodsId, Long memberId, LocalDateTime begin, LocalDateTime end);
+
+    // 获取一段时间内用户访问的某个店铺
+    ShopMemberBrowseHistory findByStoreIdAndMemberIdAndBrowseTimeBetween(Long storeId, Long memberId, LocalDateTime begin, LocalDateTime end);
+
+    // 获取一段时间内用户访问的某个评论
+    ShopMemberBrowseHistory findByCommentIdAndMemberIdAndBrowseTimeBetween(Long commentId, Long memberId, LocalDateTime begin, LocalDateTime end);
 }

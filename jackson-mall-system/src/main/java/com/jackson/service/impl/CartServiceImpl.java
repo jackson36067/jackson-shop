@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
@@ -49,10 +50,15 @@ public class CartServiceImpl implements CartService {
                         {
                             // shopCart中冗余了一些商品信息,将信息转换成需要的类型
                             CartGoodsVO cartGoodsVO = BeanUtil.copyProperties(shopCart, CartGoodsVO.class);
-                            // 处理商品规格列表
-                            List<String> specificationsList = JSONUtil.toList(shopCart.getSpecifications(), String.class);
-                            String specification = String.join(" ", specificationsList);
-                            cartGoodsVO.setSpecifications(specification);
+                            Map<String, String> specification = JSONUtil.toBean(shopCart.getSpecifications(), Map.class);
+                            // 拼接 Map 数据
+                            StringBuilder result = new StringBuilder();
+                            specification.forEach((key, value) -> result.append(key).append(":").append(value).append(" "));
+                            // 去掉最后一个空格
+                            if (result.length() > 0) {
+                                result.setLength(result.length() - 1);
+                            }
+                            cartGoodsVO.setSpecifications(result.toString());
                             // 获取商品的店家
                             ShopGood shopGood = goodsRepository.findById(shopCart.getGoodsId()).get();
                             ShopStore shopStore = shopGood.getShopStore();
