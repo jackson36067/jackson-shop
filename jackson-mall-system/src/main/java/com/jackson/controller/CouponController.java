@@ -53,6 +53,7 @@ public class CouponController {
 
     /**
      * 根据用户优惠卷id集合,珊瑚用户优惠卷,支持多删
+     *
      * @param removeMemberCouponDTO 用户优惠卷id
      */
     @PutMapping("/remove")
@@ -68,5 +69,15 @@ public class CouponController {
     @GetMapping("/center")
     public Result<List<CouponVO>> getCenterCoupon() {
         return couponService.getCenterCoupon();
+    }
+
+    /**
+     * 获取店铺可用优惠卷以及可用平台卷
+     * @param id 店铺id
+     * @return
+     */
+    @GetMapping("/use/{id}")
+    public Result<List<CouponVO>> getMemberCanUseCoupon(@PathVariable Long id) {
+        return couponService.getMemberCanUseCoupon(id);
     }
 }

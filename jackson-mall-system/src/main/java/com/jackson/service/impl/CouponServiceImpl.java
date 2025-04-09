@@ -68,7 +68,7 @@ public class CouponServiceImpl implements CouponService {
      */
     public Result<List<CouponVO>> getUnGetStoreCouponList(Long id) {
         // 获取该店家所有优惠卷
-        List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStore_IdAndExpireTimeAfter(id,LocalDateTime.now());
+        List<ShopCoupon> shopCouponList = couponRepository.findAllByShopStore_IdAndExpireTimeAfter(id, LocalDateTime.now());
         Long userId = BaseContext.getCurrentId();
         // 移除用户已经领取过的优惠卷, 获取通过优惠卷获取用户信息, 返回不包含该用户的优惠卷
         shopCouponList = shopCouponList.stream()
@@ -192,15 +192,38 @@ public class CouponServiceImpl implements CouponService {
      */
     public Result<List<CouponVO>> getCenterCoupon() {
         // 获取所有平台提供的优惠卷
-        List<ShopCoupon> platformCouponList = couponRepository.findAllByTypeAndExpireTimeBefore((short) 1,LocalDateTime.now());
+        List<ShopCoupon> platformCouponList = couponRepository.findAllByTypeAndExpireTimeBefore((short) 1, LocalDateTime.now());
         // 过滤出用户已经获取的优惠卷
         List<CouponVO> platformCouponVoList = platformCouponList
                 .stream()
                 .filter(platformCoupon ->
                         memberCouponRepository.existsByUserIdAndCouponId(BaseContext.getCurrentId(), platformCoupon.getId())
                 )
-                .map(shopCoupon -> BeanUtil.copyProperties(shopCoupon,CouponVO.class))
+                .map(shopCoupon -> BeanUtil.copyProperties(shopCoupon, CouponVO.class))
                 .toList();
         return Result.success(platformCouponVoList);
+    }
+
+    /**
+     * 获取店铺可用优惠卷以及可用平台卷
+     *
+     * @return
+     */
+    public Result<List<CouponVO>> getMemberCanUseCoupon(Long id) {
+        if (BaseContext.getCurrentId() == null) {
+            return Result.success(new ArrayList<>());
+        }
+        List<ShopMemberCoupon> shopMemberCouponList = memberCouponRepository.findAllByUserIdAndUseStatusAndDelFlagAndExpireTimeAfter(BaseContext.getCurrentId(), (short) 0, (short) 0, LocalDateTime.now());
+        if (shopMemberCouponList != null && !shopMemberCouponList.isEmpty()) {
+            shopMemberCouponList = shopMemberCouponList
+                    .stream()
+                    .filter(shopMemberCoupon -> Objects.equals(shopMemberCoupon.getStoreId(), id) || shopMemberCoupon.getStoreId() == null)
+                    .toList();
+        }
+        List<CouponVO> couponVOList = shopMemberCouponList.
+                stream()
+                .map(shopMemberCoupon -> BeanUtil.copyProperties(shopMemberCoupon, CouponVO.class))
+                .toList();
+        return Result.success(couponVOList);
     }
 }
