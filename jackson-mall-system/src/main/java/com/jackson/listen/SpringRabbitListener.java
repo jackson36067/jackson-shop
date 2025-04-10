@@ -1,22 +1,21 @@
 package com.jackson.listen;
 
 import com.jackson.constant.RabbitMQConstant;
-import com.jackson.entity.ShopCoupon;
-import com.jackson.entity.ShopMemberBrowseHistory;
-import com.jackson.entity.ShopMemberCoupon;
-import com.jackson.entity.ShopMemberFollowStore;
-import com.jackson.repository.CouponRepository;
-import com.jackson.repository.MemberBrowseHistoryRepository;
-import com.jackson.repository.MemberCouponRepository;
-import com.jackson.repository.MemberFollowStoreRepository;
+import com.jackson.dto.OrderGoodsDTO;
+import com.jackson.entity.*;
+import com.jackson.exception.InventoryNotSufficientException;
+import com.jackson.repository.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -30,9 +29,13 @@ public class SpringRabbitListener {
     @Resource
     private CouponRepository couponRepository;
     @Resource
-    private MemberCouponRepository shopCouponRepository;
+    private MemberCouponRepository memberCouponRepository;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private GoodsProductRepository goodsProductRepository;
+    @Resource
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     /**
      * 监听队列shop_queue的信息,将信息添加到数据库中,用户关注店铺信息
@@ -76,7 +79,7 @@ public class SpringRabbitListener {
             }
         }
         if (goodsId != null) {
-            ShopMemberBrowseHistory shopMemberBrowseHistory1= memberBrowseHistoryRepository.findByGoodsIdAndMemberIdAndBrowseTimeBetween(goodsId, userId, LocalDate.now().atStartOfDay(), LocalDateTime.now());
+            ShopMemberBrowseHistory shopMemberBrowseHistory1 = memberBrowseHistoryRepository.findByGoodsIdAndMemberIdAndBrowseTimeBetween(goodsId, userId, LocalDate.now().atStartOfDay(), LocalDateTime.now());
             if (shopMemberBrowseHistory1 != null) {
                 shopMemberBrowseHistory1.setBrowseTime(LocalDateTime.now());
                 memberBrowseHistoryRepository.saveAndFlush(shopMemberBrowseHistory1);
@@ -132,6 +135,59 @@ public class SpringRabbitListener {
         shopMemberCoupon.setUserId(userId);
         shopMemberCoupon.setUseStatus((short) 0);
         shopMemberCoupon.setDelFlag((short) 0);
-        shopCouponRepository.save(shopMemberCoupon);
+        memberCouponRepository.save(shopMemberCoupon);
+    }
+
+    /**
+     * 监听用户购物时使用的优惠卷
+     *
+     * @param memberCouponIdList 用户使用的优惠卷id集合
+     */
+    @RabbitListener(queues = RabbitMQConstant.ORDER_COUPON_QUEUE)
+    public void listenOrderUseCoupon(List<Long> memberCouponIdList) {
+        // 将所有使用的优惠卷改为使用状态
+        memberCouponRepository.updateAllUseStatus(memberCouponIdList, (short) 1);
+    }
+
+    /**
+     * 监听购物时购买商品规格的数量,对数量进行删减
+     *
+     * @param specQuantities
+     */
+    @RabbitListener(queues = RabbitMQConstant.ORDER_PRODUCT_QUEUE, concurrency = "5-10")
+    public void listenOrderPurchaseProductNumber(Map<Long, Integer> specQuantities) {
+        specQuantities.forEach((k, v) -> {
+            ShopGoodsProduct shopGoodsProduct = goodsProductRepository.findByIdAndNumberAfter(k, v);
+            if (shopGoodsProduct == null) {
+                throw new InventoryNotSufficientException("库存不足");
+            }
+        });
+        // 批量修改商品规格剩余库存
+        // 动态生成 CASE WHEN 语句
+        StringBuilder queryBuilder = new StringBuilder("UPDATE shop_goods_product ps SET ps.number = ps.number - CASE ");
+
+        // 存储查询参数
+        Map<String, Object> updateParams = new HashMap<>();
+
+        // 遍历 map，构建动态查询
+        for (Map.Entry<Long, Integer> entry : specQuantities.entrySet()) {
+            Long specId = entry.getKey();
+            Integer quantity = entry.getValue();
+            queryBuilder.append("WHEN ps.id = :id" + specId + " THEN :number" + specId + " ");
+
+            // 将 specId 和 quantity 添加到参数中
+            updateParams.put("id" + specId, specId);
+            updateParams.put("number" + specId, quantity);
+        }
+
+        // 完成 CASE WHEN 语句
+        queryBuilder.append("ELSE 0 END WHERE ps.id IN (:idList)");
+
+        // 将所有的 specId 提取出来，作为查询参数传入
+        updateParams.put("idList", specQuantities.keySet());
+
+        // 执行更新操作
+        String sql = queryBuilder.toString();
+        namedParameterJdbcTemplate.update(sql, updateParams);
     }
 }

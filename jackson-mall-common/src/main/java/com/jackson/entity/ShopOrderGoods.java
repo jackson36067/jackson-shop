@@ -1,29 +1,28 @@
 package com.jackson.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "shop_order_goods")
+@EntityListeners(AuditingEntityListener.class)
 public class ShopOrderGoods {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
     @ColumnDefault("0")
-    @Column(name = "order_id", nullable = false)
-    private Integer orderId;
-
-    @ColumnDefault("0")
     @Column(name = "goods_id", nullable = false)
-    private Integer goodsId;
+    private Long goodsId;
 
     @ColumnDefault("''")
     @Column(name = "goods_name", nullable = false, length = 127)
@@ -35,7 +34,7 @@ public class ShopOrderGoods {
 
     @ColumnDefault("0")
     @Column(name = "product_id", nullable = false)
-    private Integer productId;
+    private Long productId;
 
     @ColumnDefault("0")
     @Column(name = "number", nullable = false)
@@ -57,21 +56,26 @@ public class ShopOrderGoods {
     private Integer comment;
 
     @Column(name = "create_time")
-    private Instant createTime;
+    @CreatedDate
+    private LocalDateTime createTime;
 
     @Column(name = "update_time")
-    private Instant updateTime;
+    @LastModifiedDate
+    private LocalDateTime updateTime;
 
     @ColumnDefault("0")
     @Column(name = "del_flag")
     private Boolean delFlag;
 
+    @ManyToOne
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private ShopOrder shopOrder;
+
     public ShopOrderGoods() {
     }
 
-    public ShopOrderGoods(Long id, Integer orderId, Integer goodsId, String goodsName, String goodsSn, Integer productId, Short number, BigDecimal price, String specifications, String picUrl, Integer comment, Instant createTime, Instant updateTime, Boolean delFlag) {
+    public ShopOrderGoods(Long id, Long goodsId, String goodsName, String goodsSn, Long productId, Short number, BigDecimal price, String specifications, String picUrl, Integer comment, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, ShopOrder shopOrder) {
         this.id = id;
-        this.orderId = orderId;
         this.goodsId = goodsId;
         this.goodsName = goodsName;
         this.goodsSn = goodsSn;
@@ -84,6 +88,7 @@ public class ShopOrderGoods {
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.delFlag = delFlag;
+        this.shopOrder = shopOrder;
     }
 
     public Long getId() {
@@ -94,19 +99,19 @@ public class ShopOrderGoods {
         this.id = id;
     }
 
-    public Integer getOrderId() {
-        return orderId;
+    public ShopOrder getShopOrder() {
+        return shopOrder;
     }
 
-    public void setOrderId(Integer orderId) {
-        this.orderId = orderId;
+    public void setShopOrder(ShopOrder shopOrder) {
+        this.shopOrder = shopOrder;
     }
 
-    public Integer getGoodsId() {
+    public Long getGoodsId() {
         return goodsId;
     }
 
-    public void setGoodsId(Integer goodsId) {
+    public void setGoodsId(Long goodsId) {
         this.goodsId = goodsId;
     }
 
@@ -126,11 +131,11 @@ public class ShopOrderGoods {
         this.goodsSn = goodsSn;
     }
 
-    public Integer getProductId() {
+    public Long getProductId() {
         return productId;
     }
 
-    public void setProductId(Integer productId) {
+    public void setProductId(Long productId) {
         this.productId = productId;
     }
 
@@ -174,19 +179,19 @@ public class ShopOrderGoods {
         this.comment = comment;
     }
 
-    public Instant getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Instant createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
-    public Instant getUpdateTime() {
+    public LocalDateTime getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Instant updateTime) {
+    public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
 
@@ -202,19 +207,18 @@ public class ShopOrderGoods {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ShopOrderGoods that = (ShopOrderGoods) o;
-        return Objects.equals(id, that.id) && Objects.equals(orderId, that.orderId) && Objects.equals(goodsId, that.goodsId) && Objects.equals(goodsName, that.goodsName) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(productId, that.productId) && Objects.equals(number, that.number) && Objects.equals(price, that.price) && Objects.equals(specifications, that.specifications) && Objects.equals(picUrl, that.picUrl) && Objects.equals(comment, that.comment) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag);
+        return Objects.equals(id, that.id) && Objects.equals(goodsId, that.goodsId) && Objects.equals(goodsName, that.goodsName) && Objects.equals(goodsSn, that.goodsSn) && Objects.equals(productId, that.productId) && Objects.equals(number, that.number) && Objects.equals(price, that.price) && Objects.equals(specifications, that.specifications) && Objects.equals(picUrl, that.picUrl) && Objects.equals(comment, that.comment) && Objects.equals(createTime, that.createTime) && Objects.equals(updateTime, that.updateTime) && Objects.equals(delFlag, that.delFlag) && Objects.equals(shopOrder, that.shopOrder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, orderId, goodsId, goodsName, goodsSn, productId, number, price, specifications, picUrl, comment, createTime, updateTime, delFlag);
+        return Objects.hash(id, goodsId, goodsName, goodsSn, productId, number, price, specifications, picUrl, comment, createTime, updateTime, delFlag, shopOrder);
     }
 
     @Override
     public String toString() {
         return "ShopOrderGoods{" +
                 "id=" + id +
-                ", orderId=" + orderId +
                 ", goodsId=" + goodsId +
                 ", goodsName='" + goodsName + '\'' +
                 ", goodsSn='" + goodsSn + '\'' +
@@ -227,6 +231,7 @@ public class ShopOrderGoods {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", delFlag=" + delFlag +
+                ", shopOrder=" + shopOrder +
                 '}';
     }
 }

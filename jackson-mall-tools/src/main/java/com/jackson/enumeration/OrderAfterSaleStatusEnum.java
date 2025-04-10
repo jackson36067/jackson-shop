@@ -3,7 +3,7 @@ package com.jackson.enumeration;
 import lombok.Getter;
 
 @Getter
-public enum OrderAfterSaleStatus {
+public enum OrderAfterSaleStatusEnum {
     MayApply(0), // 用户可申请退款
     HaveApply(1), // 用户已经申请退款
     Approved(2), // 审核通过
@@ -13,7 +13,7 @@ public enum OrderAfterSaleStatus {
 
     private final Integer type;
 
-    OrderAfterSaleStatus(Integer type) {
+    OrderAfterSaleStatusEnum(Integer type) {
         this.type = type;
     }
 }

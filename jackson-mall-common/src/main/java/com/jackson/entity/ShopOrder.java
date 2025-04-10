@@ -2,14 +2,19 @@ package com.jackson.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Table(name = "shop_order")
+@EntityListeners(AuditingEntityListener.class)
 public class ShopOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +28,11 @@ public class ShopOrder {
     private String orderSn;
 
     @Column(name = "order_status", nullable = false)
-    private Short orderStatus;
+    private Integer orderStatus;
 
     @ColumnDefault("0")
     @Column(name = "aftersale_status")
-    private Short afterSaleStatus;
+    private Integer afterSaleStatus;
 
     @Column(name = "consignee", nullable = false, length = 63)
     private String consignee;
@@ -64,7 +69,7 @@ public class ShopOrder {
     private LocalDateTime payTime;
 
     @Column(name = "pay_type")
-    private Short payType;
+    private Integer payType;
 
     @Column(name = "ship_sn", length = 63)
     private String shipSn;
@@ -76,7 +81,7 @@ public class ShopOrder {
     private LocalDateTime shipTime;
 
     @Column(name = "refund_status")
-    private Short refundStatus;
+    private Integer refundStatus;
 
     @ColumnDefault("0.00")
     @Column(name = "refund_amount", precision = 10, scale = 2)
@@ -96,25 +101,30 @@ public class ShopOrder {
 
     @ColumnDefault("0")
     @Column(name = "comments")
-    private Short comments;
+    private Integer comments;
 
     @Column(name = "order_end_time")
     private LocalDateTime orderEndTime;
 
     @Column(name = "create_time")
+    @CreatedDate
     private LocalDateTime createTime;
 
     @Column(name = "update_time")
+    @LastModifiedDate
     private LocalDateTime updateTime;
 
     @ColumnDefault("0")
     @Column(name = "del_flag")
     private Boolean delFlag;
 
+    @OneToMany(mappedBy = "shopOrder", cascade = CascadeType.ALL)
+    private List<ShopOrderGoods> shopOrderGoodsList;
+
     public ShopOrder() {
     }
 
-    public ShopOrder(Long id, Long userId, String orderSn, Short orderStatus, Short aftersaleStatus, String consignee, String mobile, String address, String message, BigDecimal goodsPrice, BigDecimal freightPrice, BigDecimal couponPrice, BigDecimal orderPrice, BigDecimal actualPrice, String payId, LocalDateTime payTime, Short payType, String shipSn, String shipChannel, LocalDateTime shipTime, Short refundStatus, BigDecimal refundAmount, String refundType, String refundContent, LocalDateTime refundTime, Instant confirmTime, Short comments, LocalDateTime orderEndTime, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag) {
+    public ShopOrder(Long id, Long userId, String orderSn, Integer orderStatus, Integer aftersaleStatus, String consignee, String mobile, String address, String message, BigDecimal goodsPrice, BigDecimal freightPrice, BigDecimal couponPrice, BigDecimal orderPrice, BigDecimal actualPrice, String payId, LocalDateTime payTime, Integer payType, String shipSn, String shipChannel, LocalDateTime shipTime, Integer refundStatus, BigDecimal refundAmount, String refundType, String refundContent, LocalDateTime refundTime, Instant confirmTime, Integer comments, LocalDateTime orderEndTime, LocalDateTime createTime, LocalDateTime updateTime, Boolean delFlag, List<ShopOrderGoods> shopOrderGoodsList) {
         this.id = id;
         this.userId = userId;
         this.orderSn = orderSn;
@@ -146,6 +156,7 @@ public class ShopOrder {
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.delFlag = delFlag;
+        this.shopOrderGoodsList = shopOrderGoodsList;
     }
 
     public Long getId() {
@@ -172,19 +183,19 @@ public class ShopOrder {
         this.orderSn = orderSn;
     }
 
-    public Short getOrderStatus() {
+    public Integer getOrderStatus() {
         return orderStatus;
     }
 
-    public void setOrderStatus(Short orderStatus) {
+    public void setOrderStatus(Integer orderStatus) {
         this.orderStatus = orderStatus;
     }
 
-    public Short getAfterSaleStatus() {
+    public Integer getAfterSaleStatus() {
         return afterSaleStatus;
     }
 
-    public void setAfterSaleStatus(Short aftersaleStatus) {
+    public void setAfterSaleStatus(Integer aftersaleStatus) {
         this.afterSaleStatus = aftersaleStatus;
     }
 
@@ -276,11 +287,11 @@ public class ShopOrder {
         this.payTime = payTime;
     }
 
-    public Short getPayType() {
+    public Integer getPayType() {
         return payType;
     }
 
-    public void setPayType(Short payType) {
+    public void setPayType(Integer payType) {
         this.payType = payType;
     }
 
@@ -308,11 +319,11 @@ public class ShopOrder {
         this.shipTime = shipTime;
     }
 
-    public Short getRefundStatus() {
+    public Integer getRefundStatus() {
         return refundStatus;
     }
 
-    public void setRefundStatus(Short refundStatus) {
+    public void setRefundStatus(Integer refundStatus) {
         this.refundStatus = refundStatus;
     }
 
@@ -356,11 +367,11 @@ public class ShopOrder {
         this.confirmTime = confirmTime;
     }
 
-    public Short getComments() {
+    public Integer getComments() {
         return comments;
     }
 
-    public void setComments(Short comments) {
+    public void setComments(Integer comments) {
         this.comments = comments;
     }
 
@@ -396,16 +407,24 @@ public class ShopOrder {
         this.delFlag = delFlag;
     }
 
+    public List<ShopOrderGoods> getShopOrderGoodsList() {
+        return shopOrderGoodsList;
+    }
+
+    public void setShopOrderGoodsList(List<ShopOrderGoods> shopOrderGoodsList) {
+        this.shopOrderGoodsList = shopOrderGoodsList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ShopOrder shopOrder = (ShopOrder) o;
-        return Objects.equals(id, shopOrder.id) && Objects.equals(userId, shopOrder.userId) && Objects.equals(orderSn, shopOrder.orderSn) && Objects.equals(orderStatus, shopOrder.orderStatus) && Objects.equals(afterSaleStatus, shopOrder.afterSaleStatus) && Objects.equals(consignee, shopOrder.consignee) && Objects.equals(mobile, shopOrder.mobile) && Objects.equals(address, shopOrder.address) && Objects.equals(message, shopOrder.message) && Objects.equals(goodsPrice, shopOrder.goodsPrice) && Objects.equals(freightPrice, shopOrder.freightPrice) && Objects.equals(couponPrice, shopOrder.couponPrice) && Objects.equals(orderPrice, shopOrder.orderPrice) && Objects.equals(actualPrice, shopOrder.actualPrice) && Objects.equals(payId, shopOrder.payId) && Objects.equals(payTime, shopOrder.payTime) && Objects.equals(payType, shopOrder.payType) && Objects.equals(shipSn, shopOrder.shipSn) && Objects.equals(shipChannel, shopOrder.shipChannel) && Objects.equals(shipTime, shopOrder.shipTime) && Objects.equals(refundStatus, shopOrder.refundStatus) && Objects.equals(refundAmount, shopOrder.refundAmount) && Objects.equals(refundType, shopOrder.refundType) && Objects.equals(refundContent, shopOrder.refundContent) && Objects.equals(refundTime, shopOrder.refundTime) && Objects.equals(confirmTime, shopOrder.confirmTime) && Objects.equals(comments, shopOrder.comments) && Objects.equals(orderEndTime, shopOrder.orderEndTime) && Objects.equals(createTime, shopOrder.createTime) && Objects.equals(updateTime, shopOrder.updateTime) && Objects.equals(delFlag, shopOrder.delFlag);
+        return Objects.equals(id, shopOrder.id) && Objects.equals(userId, shopOrder.userId) && Objects.equals(orderSn, shopOrder.orderSn) && Objects.equals(orderStatus, shopOrder.orderStatus) && Objects.equals(afterSaleStatus, shopOrder.afterSaleStatus) && Objects.equals(consignee, shopOrder.consignee) && Objects.equals(mobile, shopOrder.mobile) && Objects.equals(address, shopOrder.address) && Objects.equals(message, shopOrder.message) && Objects.equals(goodsPrice, shopOrder.goodsPrice) && Objects.equals(freightPrice, shopOrder.freightPrice) && Objects.equals(couponPrice, shopOrder.couponPrice) && Objects.equals(orderPrice, shopOrder.orderPrice) && Objects.equals(actualPrice, shopOrder.actualPrice) && Objects.equals(payId, shopOrder.payId) && Objects.equals(payTime, shopOrder.payTime) && Objects.equals(payType, shopOrder.payType) && Objects.equals(shipSn, shopOrder.shipSn) && Objects.equals(shipChannel, shopOrder.shipChannel) && Objects.equals(shipTime, shopOrder.shipTime) && Objects.equals(refundStatus, shopOrder.refundStatus) && Objects.equals(refundAmount, shopOrder.refundAmount) && Objects.equals(refundType, shopOrder.refundType) && Objects.equals(refundContent, shopOrder.refundContent) && Objects.equals(refundTime, shopOrder.refundTime) && Objects.equals(confirmTime, shopOrder.confirmTime) && Objects.equals(comments, shopOrder.comments) && Objects.equals(orderEndTime, shopOrder.orderEndTime) && Objects.equals(createTime, shopOrder.createTime) && Objects.equals(updateTime, shopOrder.updateTime) && Objects.equals(delFlag, shopOrder.delFlag) && Objects.equals(shopOrderGoodsList, shopOrder.shopOrderGoodsList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, orderSn, orderStatus, afterSaleStatus, consignee, mobile, address, message, goodsPrice, freightPrice, couponPrice, orderPrice, actualPrice, payId, payTime, payType, shipSn, shipChannel, shipTime, refundStatus, refundAmount, refundType, refundContent, refundTime, confirmTime, comments, orderEndTime, createTime, updateTime, delFlag);
+        return Objects.hash(id, userId, orderSn, orderStatus, afterSaleStatus, consignee, mobile, address, message, goodsPrice, freightPrice, couponPrice, orderPrice, actualPrice, payId, payTime, payType, shipSn, shipChannel, shipTime, refundStatus, refundAmount, refundType, refundContent, refundTime, confirmTime, comments, orderEndTime, createTime, updateTime, delFlag, shopOrderGoodsList);
     }
 
     @Override
@@ -415,7 +434,7 @@ public class ShopOrder {
                 ", userId=" + userId +
                 ", orderSn='" + orderSn + '\'' +
                 ", orderStatus=" + orderStatus +
-                ", aftersaleStatus=" + afterSaleStatus +
+                ", afterSaleStatus=" + afterSaleStatus +
                 ", consignee='" + consignee + '\'' +
                 ", mobile='" + mobile + '\'' +
                 ", address='" + address + '\'' +
@@ -442,6 +461,7 @@ public class ShopOrder {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", delFlag=" + delFlag +
+                ", shopOrderGoodsList=" + shopOrderGoodsList +
                 '}';
     }
 }

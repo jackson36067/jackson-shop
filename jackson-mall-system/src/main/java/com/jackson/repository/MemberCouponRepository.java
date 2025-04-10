@@ -31,4 +31,9 @@ public interface MemberCouponRepository extends JpaRepository<ShopMemberCoupon, 
     ShopMemberCoupon findByUserIdAndCouponId(Long userId, Long couponId);
 
     boolean existsByUserIdAndCouponId(Long userId, Long couponId);
+
+    @Modifying
+    @Transactional
+    @Query("update ShopMemberCoupon s set s.useStatus = :useStatus where s.id in :idList")
+    void updateAllUseStatus(@Param("idList") List<Long> idList, @Param("useStatus") Short useStatus);
 }
