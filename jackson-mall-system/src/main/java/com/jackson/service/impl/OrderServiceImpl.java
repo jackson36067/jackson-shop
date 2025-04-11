@@ -50,6 +50,9 @@ public class OrderServiceImpl implements OrderService {
         shopOrder.setActualPrice(orderDTO.getOrderPrice());
         if (orderDTO.getPayStatus()) {
             shopOrder.setPayTime(LocalDateTime.now());
+        } else {
+            // 没有付款 -> 设置订单结束时间
+            shopOrder.setOrderEndTime(LocalDateTime.now().plusMinutes(30));
         }
         shopOrder.setPayType(1);
         List<ShopOrderGoods> ShopOrderGoodsList = orderDTO.getOrderGoodsList()
@@ -69,14 +72,14 @@ public class OrderServiceImpl implements OrderService {
         shopOrder.setShopOrderGoodsList(ShopOrderGoodsList);
         orderRepository.save(shopOrder);
         // 异步更改商品库存信息
-        Map<Long,Integer> info = new HashMap<>();
+        Map<Long, Integer> info = new HashMap<>();
         orderDTO.getOrderGoodsList().forEach(orderGoods -> {
-            info.put(orderGoods.getProductId(),orderGoods.getNumber());
+            info.put(orderGoods.getProductId(), orderGoods.getNumber());
         });
-        rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_PRODUCT_QUEUE,info);
+        rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_PRODUCT_QUEUE, info);
         // 异步处理这次购买商品使用的优惠卷
-        if(orderDTO.getUseCouponIdList() != null && !orderDTO.getUseCouponIdList().isEmpty()) {
-            rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_COUPON_QUEUE,orderDTO.getUseCouponIdList());
+        if (orderDTO.getUseCouponIdList() != null && !orderDTO.getUseCouponIdList().isEmpty()) {
+            rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_COUPON_QUEUE, orderDTO.getUseCouponIdList());
         }
         return Result.success(orderSn);
     }

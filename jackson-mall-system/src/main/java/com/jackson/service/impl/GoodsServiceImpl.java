@@ -295,7 +295,7 @@ public class GoodsServiceImpl implements GoodsService {
             goodsDetailVO.setIsCollect(isCollect);
             // 设置默认收货地址
             ShopAddress memberDefaultAddress = addressRepository.findByIsDefaultAndMemberId((short) 0, memberId);
-            if(memberDefaultAddress != null) {
+            if (memberDefaultAddress != null) {
                 // 设置默认地址id
                 goodsDetailVO.setDefaultAddressId(memberDefaultAddress.getId());
                 // 省+市+区+详情地址
@@ -349,11 +349,25 @@ public class GoodsServiceImpl implements GoodsService {
         });
         goodsDetailVO.setGoodsSpecificationList(goodsSpecificationList);
         // 异步保存用户浏览商品记录
-        Map<String,Long> userBrowseGoodsInfo = new HashMap<>();
+        Map<String, Long> userBrowseGoodsInfo = new HashMap<>();
         userBrowseGoodsInfo.put("memberId", memberId);
-        userBrowseGoodsInfo.put("type",0L);
-        userBrowseGoodsInfo.put("goodsId",id);
-        rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY,userBrowseGoodsInfo);
+        userBrowseGoodsInfo.put("type", 0L);
+        userBrowseGoodsInfo.put("goodsId", id);
+        rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY, userBrowseGoodsInfo);
         return Result.success(goodsDetailVO);
+    }
+
+    /**
+     * 获取用户可能喜欢的商品列表
+     * @param idList 商品id集合
+     * @return 用户可能喜欢的商品列表
+     */
+    public Result<List<GoodsMessageVO>> getMayLikeGoods(List<Long> idList) {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        Page<ShopGood> userMayLikeGoodsList = goodsRepository.findRandomShopGoodsExcludingIds(idList, pageRequest);
+        List<GoodsMessageVO> userMayLikeGoodsMessageList = userMayLikeGoodsList.stream()
+                .map(shopGood -> BeanUtil.copyProperties(shopGood, GoodsMessageVO.class))
+                .toList();
+        return Result.success(userMayLikeGoodsMessageList);
     }
 }

@@ -7,9 +7,7 @@ import com.jackson.service.GoodsService;
 import com.jackson.vo.CollectGoodsVO;
 import com.jackson.vo.GoodsDetailVO;
 import com.jackson.vo.GoodsMessageVO;
-import com.jackson.vo.GoodsSkuVO;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -76,12 +74,22 @@ public class GoodsController {
     }
 
     /**
-     * 根据商品id获取地址详情
+     * 根据商品id获取商品详情
      * @param id 商品id
      * @return 商品详情对象
      */
     @GetMapping("/detail/{id}")
     public Result<GoodsDetailVO> getGoodsById(@PathVariable Long id) {
         return goodsService.getGoodsDetail(id);
+    }
+
+    /**
+     * 获取用户可能喜欢的商品列表
+     * @param mayLikeGoodsDTO 商品id集合
+     * @return 用户可能喜欢的商品列表
+     */
+    @GetMapping("/like")
+    public Result<List<GoodsMessageVO>> getMayLikeGoods(@RequestParam List<Long> idList ) {
+        return goodsService.getMayLikeGoods(idList);
     }
 }
