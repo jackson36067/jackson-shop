@@ -55,7 +55,7 @@ public class CartServiceImpl implements CartService {
                             StringBuilder result = new StringBuilder();
                             specification.forEach((key, value) -> result.append(key).append(":").append(value).append(" "));
                             // 去掉最后一个空格
-                            if (result.length() > 0) {
+                            if (!result.isEmpty()) {
                                 result.setLength(result.length() - 1);
                             }
                             cartGoodsVO.setSpecifications(result.toString());
