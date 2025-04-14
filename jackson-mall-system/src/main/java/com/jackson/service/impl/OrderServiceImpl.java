@@ -81,15 +81,26 @@ public class OrderServiceImpl implements OrderService {
         shopOrder.setShopOrderGoodsList(ShopOrderGoodsList);
         orderRepository.save(shopOrder);
         // 异步更改商品库存信息
-        Map<Long, Integer> info = new HashMap<>();
+        Map<Long, Integer> orderProductInfo = new HashMap<>();
         orderDTO.getOrderGoodsList().forEach(orderGoods -> {
-            info.put(orderGoods.getProductId(), orderGoods.getNumber());
+            orderProductInfo.put(orderGoods.getProductId(), orderGoods.getNumber());
         });
-        rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_PRODUCT_QUEUE, info);
+        rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_PRODUCT_QUEUE, orderProductInfo);
         // 异步处理这次购买商品使用的优惠卷
         if (orderDTO.getUseCouponIdList() != null && !orderDTO.getUseCouponIdList().isEmpty()) {
             rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_COUPON_QUEUE, orderDTO.getUseCouponIdList());
         }
+        // 异步更改商品被购买数量
+        Map<Long, Integer> orderGoodsInfo = new HashMap<>();
+        orderDTO.getOrderGoodsList().forEach(orderGoods -> {
+            // 判断是否已经存在key,存在对数据类型累加
+            if (orderGoodsInfo.containsKey(orderGoods.getGoodsId())) {
+                orderGoodsInfo.compute(orderGoods.getGoodsId(), (k, purchaseCount) -> purchaseCount + orderGoods.getNumber());
+            } else {
+                orderGoodsInfo.put(orderGoods.getGoodsId(), orderGoods.getNumber());
+            }
+        });
+        rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_GOODS_QUEUE, orderGoodsInfo);
         return Result.success(orderSn);
     }
 

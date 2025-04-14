@@ -1,7 +1,6 @@
 package com.jackson.listen;
 
 import com.jackson.constant.RabbitMQConstant;
-import com.jackson.dto.OrderGoodsDTO;
 import com.jackson.entity.*;
 import com.jackson.exception.InventoryNotSufficientException;
 import com.jackson.repository.*;
@@ -36,6 +35,8 @@ public class SpringRabbitListener {
     private GoodsProductRepository goodsProductRepository;
     @Resource
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Resource
+    private GoodsRepository goodsRepository;
 
     /**
      * 监听队列shop_queue的信息,将信息添加到数据库中,用户关注店铺信息
@@ -152,7 +153,7 @@ public class SpringRabbitListener {
     /**
      * 监听购物时购买商品规格的数量,对数量进行删减
      *
-     * @param specQuantities
+     * @param specQuantities 订单中商品规格以及数量数据
      */
     @RabbitListener(queues = RabbitMQConstant.ORDER_PRODUCT_QUEUE, concurrency = "5-10")
     public void listenOrderPurchaseProductNumber(Map<Long, Integer> specQuantities) {
@@ -185,6 +186,36 @@ public class SpringRabbitListener {
 
         // 将所有的 specId 提取出来，作为查询参数传入
         updateParams.put("idList", specQuantities.keySet());
+
+        // 执行更新操作
+        String sql = queryBuilder.toString();
+        namedParameterJdbcTemplate.update(sql, updateParams);
+    }
+
+    @RabbitListener(queues = RabbitMQConstant.ORDER_GOODS_QUEUE, concurrency = "5-10")
+    public void listenOrderGoods(Map<Long, Integer> orderGoodsInfo) {
+        // 修改商品实际售卖数量
+        // 动态生成 CASE WHEN 语句
+        StringBuilder queryBuilder = new StringBuilder("UPDATE shop_goods sg SET sg.actual_sales = sg.actual_sales + CASE ");
+
+        // 存储查询参数
+        Map<String, Object> updateParams = new HashMap<>();
+
+        // 遍历 map，构建动态查询
+        for (Map.Entry<Long, Integer> entry : orderGoodsInfo.entrySet()) {
+            Long goodsId = entry.getKey();
+            Integer salesCount = entry.getValue();
+            queryBuilder.append("WHEN sg.id = :id" + goodsId + " THEN :actual_sales" + goodsId + " ");
+            // 将商品id以及售卖数量添加到更新参数中
+            updateParams.put("id" + goodsId, goodsId);
+            updateParams.put("actual_sales" + goodsId, salesCount);
+        }
+
+        // 完成 CASE WHEN 语句
+        queryBuilder.append("ELSE 0 END WHERE sg.id IN (:idList)");
+
+        // 将所有的 specId 提取出来，作为查询参数传入
+        updateParams.put("idList", orderGoodsInfo.keySet());
 
         // 执行更新操作
         String sql = queryBuilder.toString();

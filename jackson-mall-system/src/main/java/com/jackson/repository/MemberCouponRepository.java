@@ -36,4 +36,9 @@ public interface MemberCouponRepository extends JpaRepository<ShopMemberCoupon, 
     @Transactional
     @Query("update ShopMemberCoupon s set s.useStatus = :useStatus where s.id in :idList")
     void updateAllUseStatus(@Param("idList") List<Long> idList, @Param("useStatus") Short useStatus);
+
+    @Modifying
+    @Transactional
+    @Query("update ShopMemberCoupon s set s.delFlag = :delFlag where s.expireTime < :expireTime")
+    void updateAllDelFlagBeforeExpireTime(@Param("delFlag") Short delFlag, @Param("expireTime") LocalDateTime expireTime);
 }

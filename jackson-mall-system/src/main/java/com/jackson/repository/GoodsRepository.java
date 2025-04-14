@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface GoodsRepository extends JpaRepository<ShopGood, Long>, JpaSpecificationExecutor<ShopGood> {
@@ -20,4 +22,11 @@ public interface GoodsRepository extends JpaRepository<ShopGood, Long>, JpaSpeci
 
     @Query("select s from ShopGood s where s.id not in :idList order by rand()")
     Page<ShopGood> findRandomShopGoodsExcludingIds(List<Long> idList, Pageable pageable);
+
+
+    // 筛选出一个月前发布的商品,以及该商品还是新品
+    List<ShopGood> findAllByIsNewAndCreateTimeBefore(Boolean isNew, LocalDateTime time);
+
+    // 筛选出热卖的商品
+    List<ShopGood> findAllByIsHotAndActualSales(Boolean isHot, Integer actualSales);
 }
