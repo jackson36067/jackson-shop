@@ -3,6 +3,7 @@ package com.jackson.controller;
 import com.jackson.dto.OrderDTO;
 import com.jackson.result.Result;
 import com.jackson.service.OrderService;
+import com.jackson.vo.OrderDataVO;
 import com.jackson.vo.OrderVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,17 @@ public class OrderController {
      * @return 订单数据列表
      */
     @GetMapping("/list")
-    public Result<List<OrderVO>> getOrderList(Integer type, @RequestParam(required = false) String goodsNameOrOrderSnParam, @RequestParam(required = false)LocalDateTime placeOrderBeginTimeParam,@RequestParam(required = false)LocalDateTime placeOrderEndTimeParam) {
-        return orderService.getOrderList(type, goodsNameOrOrderSnParam, placeOrderBeginTimeParam,placeOrderEndTimeParam);
+    public Result<List<OrderVO>> getOrderList(Integer type, @RequestParam(required = false) String goodsNameOrOrderSnParam, @RequestParam(required = false) LocalDateTime placeOrderBeginTimeParam, @RequestParam(required = false) LocalDateTime placeOrderEndTimeParam) {
+        return orderService.getOrderList(type, goodsNameOrOrderSnParam, placeOrderBeginTimeParam, placeOrderEndTimeParam);
+    }
+
+    /**
+     * 获取订单各类型数量数据
+     *
+     * @return 订单各个类型数量数据
+     */
+    @GetMapping("/data")
+    public Result<OrderDataVO> getOrderTypeNumberData() {
+        return orderService.getOrderTypeNumberData();
     }
 }

@@ -11,7 +11,8 @@ public enum OrderTypeEnum {
     PendingPayment(1), // 待支付订单
     PendingShipment(2), // 代发货
     PendingReceipt(3), // 待收货
-    Complete(4); // 已完成
+    Complete(4), // 已完成
+    Refund(5); // 退款/售后
 
     private final Integer orderType;
 
