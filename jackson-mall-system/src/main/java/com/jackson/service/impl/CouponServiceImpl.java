@@ -209,17 +209,11 @@ public class CouponServiceImpl implements CouponService {
      *
      * @return
      */
-    public Result<List<CouponVO>> getMemberCanUseCoupon(Long id) {
+    public Result<List<CouponVO>> getMemberCanUseCoupon(List<Long> storeIds) {
         if (BaseContext.getCurrentId() == null) {
             return Result.success(new ArrayList<>());
         }
-        List<ShopMemberCoupon> shopMemberCouponList = memberCouponRepository.findAllByUserIdAndUseStatusAndDelFlagAndExpireTimeAfter(BaseContext.getCurrentId(), (short) 0, (short) 0, LocalDateTime.now());
-        if (shopMemberCouponList != null && !shopMemberCouponList.isEmpty()) {
-            shopMemberCouponList = shopMemberCouponList
-                    .stream()
-                    .filter(shopMemberCoupon -> Objects.equals(shopMemberCoupon.getStoreId(), id) || shopMemberCoupon.getStoreId() == null)
-                    .toList();
-        }
+        List<ShopMemberCoupon> shopMemberCouponList = memberCouponRepository.findAllByStoreIdInAndUserIdAndUseStatusAndDelFlagAndExpireTimeAfter(storeIds, BaseContext.getCurrentId(), (short) 0, (short) 0, LocalDateTime.now());
         List<CouponVO> couponVOList = shopMemberCouponList.
                 stream()
                 .map(shopMemberCoupon -> BeanUtil.copyProperties(shopMemberCoupon, CouponVO.class))

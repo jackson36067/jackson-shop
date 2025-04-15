@@ -17,4 +17,6 @@ public interface AddressService {
     Result<AddressVO> getMemberAddressById(Long id);
 
     void removeAddressById(Long id);
+
+    Result<AddressVO> getMemberDefaultAddress();
 }

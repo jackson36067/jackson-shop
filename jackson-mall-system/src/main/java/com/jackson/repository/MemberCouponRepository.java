@@ -41,4 +41,6 @@ public interface MemberCouponRepository extends JpaRepository<ShopMemberCoupon, 
     @Transactional
     @Query("update ShopMemberCoupon s set s.delFlag = :delFlag where s.expireTime < :expireTime")
     void updateAllDelFlagBeforeExpireTime(@Param("delFlag") Short delFlag, @Param("expireTime") LocalDateTime expireTime);
+
+    List<ShopMemberCoupon> findAllByStoreIdInAndUserIdAndUseStatusAndDelFlagAndExpireTimeAfter(List<Long> storeIds, Long userId, Short useStatus, Short delFlag, LocalDateTime expireTime);
 }

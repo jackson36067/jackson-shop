@@ -36,7 +36,7 @@ public class SpringRabbitListener {
     @Resource
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Resource
-    private GoodsRepository goodsRepository;
+    private CartRepository cartRepository;
 
     /**
      * 监听队列shop_queue的信息,将信息添加到数据库中,用户关注店铺信息
@@ -148,6 +148,7 @@ public class SpringRabbitListener {
     public void listenOrderUseCoupon(List<Long> memberCouponIdList) {
         // 将所有使用的优惠卷改为使用状态
         memberCouponRepository.updateAllUseStatus(memberCouponIdList, (short) 1);
+        log.info("监听到订单中使用了优惠卷");
     }
 
     /**
@@ -190,8 +191,13 @@ public class SpringRabbitListener {
         // 执行更新操作
         String sql = queryBuilder.toString();
         namedParameterJdbcTemplate.update(sql, updateParams);
+        log.info("监听购物减少商品库存");
     }
 
+    /**
+     * 监听购物时,增加商品的实际售卖量
+     * @param orderGoodsInfo 商品id以及售卖数量map
+     */
     @RabbitListener(queues = RabbitMQConstant.ORDER_GOODS_QUEUE, concurrency = "5-10")
     public void listenOrderGoods(Map<Long, Integer> orderGoodsInfo) {
         // 修改商品实际售卖数量
@@ -220,5 +226,16 @@ public class SpringRabbitListener {
         // 执行更新操作
         String sql = queryBuilder.toString();
         namedParameterJdbcTemplate.update(sql, updateParams);
+        log.info("监听购物增加商品实际售卖量");
+    }
+
+    /**
+     * 监听从购物车中购物,删除购物车中相关商品
+     * @param cartGoodsIdList 购物车商品id
+     */
+    @RabbitListener(queues = RabbitMQConstant.ORDER_CART_QUEUE)
+    public void listenOrderCartGoodsList(List<Long> cartGoodsIdList) {
+        cartRepository.deleteAllByIdInBatch(cartGoodsIdList);
+        log.info("监听购买购物车商品");
     }
 }

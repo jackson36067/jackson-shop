@@ -76,8 +76,8 @@ public class CouponController {
      * @param id 店铺id
      * @return
      */
-    @GetMapping("/use/{id}")
-    public Result<List<CouponVO>> getMemberCanUseCoupon(@PathVariable Long id) {
-        return couponService.getMemberCanUseCoupon(id);
+    @GetMapping("/use")
+    public Result<List<CouponVO>> getMemberCanUseCoupon(@RequestParam List<Long> storeIds) {
+        return couponService.getMemberCanUseCoupon(storeIds);
     }
 }

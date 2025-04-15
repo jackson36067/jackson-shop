@@ -64,4 +64,13 @@ public class AddressController {
     public void removeAddressById(@PathVariable Long id) {
       addressService.removeAddressById(id);
     }
+
+    /**
+     * 获取用户的默认地址信息
+     * @return
+     */
+    @GetMapping("/default")
+    public Result<AddressVO> getDefaultAddress() {
+       return addressService.getMemberDefaultAddress();
+    }
 }

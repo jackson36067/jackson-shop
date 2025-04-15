@@ -18,4 +18,6 @@ public interface CartRepository extends JpaRepository<ShopCart, Long> {
     void updateAllByIdIn(List<Long> ids,Boolean checked);
 
     ShopCart findByGoodsIdAndProductId(Long goodsId,Long productId);
+
+    List<ShopCart> findAllByUserIdAndChecked(Long userId,Boolean checked);
 }

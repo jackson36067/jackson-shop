@@ -6,6 +6,7 @@ import com.jackson.dto.UpdateGoodsCheckedDTO;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
 import com.jackson.vo.CartGoodsVO;
+import com.jackson.vo.CartSelectGoodsVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,5 +56,14 @@ public class CartController {
     @PostMapping("/add")
     public void addGoodsToCart(@RequestBody CartDTO cartDTO){
         cartService.addGoodsToCart(cartDTO);
+    }
+
+    /**
+     * 获取用户购物车选中的商品列表
+     * @return 购物车选中的商品列表
+     */
+    @GetMapping("/selected")
+    public Result<List<CartSelectGoodsVO>> getSelectedGoodsList() {
+        return cartService.getSelectedGoodsList();
     }
 }

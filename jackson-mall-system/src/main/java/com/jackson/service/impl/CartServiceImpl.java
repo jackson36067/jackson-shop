@@ -9,6 +9,7 @@ import com.jackson.repository.*;
 import com.jackson.result.Result;
 import com.jackson.service.CartService;
 import com.jackson.vo.CartGoodsVO;
+import com.jackson.vo.CartSelectGoodsVO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -148,5 +149,32 @@ public class CartServiceImpl implements CartService {
             shopCart.setRemark(cartDTO.getRemark());
             cartRepository.save(shopCart);
         }
+    }
+
+    /**
+     * 获取用户购物车选中的商品列表
+     *
+     * @return 购物车选中的商品列表
+     */
+    public Result<List<CartSelectGoodsVO>> getSelectedGoodsList() {
+        List<ShopCart> memberCartSelectedGoodsList = cartRepository.findAllByUserIdAndChecked(BaseContext.getCurrentId(), true);
+        List<CartSelectGoodsVO> list = memberCartSelectedGoodsList
+                .stream()
+                .map(shopCart -> {
+                    CartSelectGoodsVO cartSelectGoodsVO = new CartSelectGoodsVO();
+                    cartSelectGoodsVO.setId(shopCart.getId());
+                    cartSelectGoodsVO.setGoodsId(shopCart.getGoodsId());
+                    cartSelectGoodsVO.setGoodsName(shopCart.getGoodsName());
+                    cartSelectGoodsVO.setGoodsSn(shopCart.getGoodsSn());
+                    cartSelectGoodsVO.setNumber(shopCart.getNumber());
+                    cartSelectGoodsVO.setProductId(shopCart.getProductId());
+                    cartSelectGoodsVO.setPicUrl(shopCart.getPicUrl());
+                    cartSelectGoodsVO.setPrice(shopCart.getPrice());
+                    Map<String, String> specification = JSONUtil.toBean(shopCart.getSpecifications(), Map.class);
+                    cartSelectGoodsVO.setSpecifications(specification);
+                    return cartSelectGoodsVO;
+                })
+                .toList();
+        return Result.success(list);
     }
 }

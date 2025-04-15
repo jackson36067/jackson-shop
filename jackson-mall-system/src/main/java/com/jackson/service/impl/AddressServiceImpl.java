@@ -41,7 +41,6 @@ public class AddressServiceImpl implements AddressService {
      *
      * @param updateAddressDTO 保存默认地址信息
      */
-    // TODO: 改成修改地址信息
     public void updateMemberAddress(UpdateAddressDTO updateAddressDTO) {
         Long userId = BaseContext.getCurrentId();
         // 通过id获取用户地址信息
@@ -58,11 +57,11 @@ public class AddressServiceImpl implements AddressService {
         }
         // 如果用户更改了地址的城市 -> 有些是没有城市的
         String city = updateAddressDTO.getCity();
-        if(city != null){
+        if (city != null) {
             if (!city.equals(shopAddress.getCity())) {
                 shopAddress.setCity(city);
             }
-        }else {
+        } else {
             shopAddress.setCity("");
         }
         // 如果用户更改了地址的乡镇
@@ -145,10 +144,34 @@ public class AddressServiceImpl implements AddressService {
 
     /**
      * 根据地址id删除地址
+     *
      * @param id
      */
     public void removeAddressById(Long id) {
         addressRepository.deleteById(id);
+    }
+
+    /**
+     * 获取用户设置的默认地址
+     *
+     * @return
+     */
+    public Result<AddressVO> getMemberDefaultAddress() {
+        // 检查当前用户 ID 是否为空
+        Long currentId = BaseContext.getCurrentId();
+        if (currentId == null) {
+            return Result.success(new AddressVO()); // 当前用户未登录，直接返回空 AddressVO
+        }
+        // 查找默认地址
+        ShopAddress memberDefaultAddress = addressRepository.findByIsDefaultAndMemberId((short) 0, currentId);
+        // 如果找到默认地址，则将其转换为 AddressVO
+        AddressVO addressVO = new AddressVO();
+        if (memberDefaultAddress != null) {
+            addressVO = BeanUtil.copyProperties(memberDefaultAddress, AddressVO.class);
+        }
+
+        // 返回成功的结果
+        return Result.success(addressVO);
     }
 
     /**

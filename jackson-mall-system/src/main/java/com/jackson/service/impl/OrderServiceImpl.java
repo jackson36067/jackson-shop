@@ -101,6 +101,10 @@ public class OrderServiceImpl implements OrderService {
             }
         });
         rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_GOODS_QUEUE, orderGoodsInfo);
+        // 如果是从购物车处下单,带上了购物车id,异步将购物车中商品移除
+        if (orderDTO.getCartIdList() != null && !orderDTO.getCartIdList().isEmpty()) {
+            rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_CART_QUEUE, orderDTO.getCartIdList());
+        }
         return Result.success(orderSn);
     }
 

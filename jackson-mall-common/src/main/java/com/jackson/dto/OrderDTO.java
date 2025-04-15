@@ -17,11 +17,12 @@ public class OrderDTO implements Serializable {
     private Boolean payStatus; // 是否付款
     private List<OrderGoodsDTO> orderGoodsList; // 订单商品列表
     private List<Long> useCouponIdList; // 订单使用优惠卷列表
+    private List<Long> cartIdList;
 
     public OrderDTO() {
     }
 
-    public OrderDTO(String consignee, String mobile, String address, String message, BigDecimal goodsPrice, BigDecimal freightPrice, BigDecimal couponPrice, BigDecimal orderPrice, Boolean payStatus, List<OrderGoodsDTO> orderGoodsList, List<Long> useCouponIdList) {
+    public OrderDTO(String consignee, String mobile, String address, String message, BigDecimal goodsPrice, BigDecimal freightPrice, BigDecimal couponPrice, BigDecimal orderPrice, Boolean payStatus, List<OrderGoodsDTO> orderGoodsList, List<Long> useCouponIdList, List<Long> cartIdList) {
         this.consignee = consignee;
         this.mobile = mobile;
         this.address = address;
@@ -33,6 +34,7 @@ public class OrderDTO implements Serializable {
         this.payStatus = payStatus;
         this.orderGoodsList = orderGoodsList;
         this.useCouponIdList = useCouponIdList;
+        this.cartIdList = cartIdList;
     }
 
     public String getConsignee() {
@@ -123,16 +125,24 @@ public class OrderDTO implements Serializable {
         this.useCouponIdList = useCouponIdList;
     }
 
+    public List<Long> getCartIdList() {
+        return cartIdList;
+    }
+
+    public void setCartIdList(List<Long> cartIdList) {
+        this.cartIdList = cartIdList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         OrderDTO orderDTO = (OrderDTO) o;
-        return Objects.equals(consignee, orderDTO.consignee) && Objects.equals(mobile, orderDTO.mobile) && Objects.equals(address, orderDTO.address) && Objects.equals(message, orderDTO.message) && Objects.equals(goodsPrice, orderDTO.goodsPrice) && Objects.equals(freightPrice, orderDTO.freightPrice) && Objects.equals(couponPrice, orderDTO.couponPrice) && Objects.equals(orderPrice, orderDTO.orderPrice) && Objects.equals(payStatus, orderDTO.payStatus) && Objects.equals(orderGoodsList, orderDTO.orderGoodsList) && Objects.equals(useCouponIdList, orderDTO.useCouponIdList);
+        return Objects.equals(consignee, orderDTO.consignee) && Objects.equals(mobile, orderDTO.mobile) && Objects.equals(address, orderDTO.address) && Objects.equals(message, orderDTO.message) && Objects.equals(goodsPrice, orderDTO.goodsPrice) && Objects.equals(freightPrice, orderDTO.freightPrice) && Objects.equals(couponPrice, orderDTO.couponPrice) && Objects.equals(orderPrice, orderDTO.orderPrice) && Objects.equals(payStatus, orderDTO.payStatus) && Objects.equals(orderGoodsList, orderDTO.orderGoodsList) && Objects.equals(useCouponIdList, orderDTO.useCouponIdList) && Objects.equals(cartIdList, orderDTO.cartIdList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(consignee, mobile, address, message, goodsPrice, freightPrice, couponPrice, orderPrice, payStatus, orderGoodsList, useCouponIdList);
+        return Objects.hash(consignee, mobile, address, message, goodsPrice, freightPrice, couponPrice, orderPrice, payStatus, orderGoodsList, useCouponIdList, cartIdList);
     }
 
     @Override
@@ -149,6 +159,7 @@ public class OrderDTO implements Serializable {
                 ", payStatus=" + payStatus +
                 ", orderGoodsList=" + orderGoodsList +
                 ", useCouponIdList=" + useCouponIdList +
+                ", cartIdList=" + cartIdList +
                 '}';
     }
 }

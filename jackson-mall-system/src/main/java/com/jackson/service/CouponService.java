@@ -19,5 +19,5 @@ public interface CouponService {
 
     Result<List<CouponVO>> getCenterCoupon();
 
-    Result<List<CouponVO>> getMemberCanUseCoupon(Long id);
+    Result<List<CouponVO>> getMemberCanUseCoupon(List<Long> storeIds);
 }
