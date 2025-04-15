@@ -19,6 +19,7 @@ import com.jackson.repository.OrderRepository;
 import com.jackson.result.Result;
 import com.jackson.service.OrderService;
 import com.jackson.vo.OrderDataVO;
+import com.jackson.vo.OrderDetailVO;
 import com.jackson.vo.OrderGoodsVO;
 import com.jackson.vo.OrderVO;
 import jakarta.annotation.Resource;
@@ -31,7 +32,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -163,49 +163,9 @@ public class OrderServiceImpl implements OrderService {
         List<OrderVO> orderVoList = shopOrderList.stream().map(shopOrder -> {
             OrderVO orderVO = BeanUtil.copyProperties(shopOrder, OrderVO.class);
             // 封装订单状态
-            OrderStatusEnum orderStatusEnum = Arrays.stream(OrderStatusEnum.values()).filter(status -> status.getType().equals(shopOrder.getOrderStatus()))  // 根据 type 值匹配
-                    .findFirst().orElseThrow(() -> new IllegalArgumentException("Invalid order status"));
-            switch (orderStatusEnum) {
-                case Unpaid:
-                    orderVO.setOrderStatus(1);
-                    break;
-                case Unshipped:
-                    orderVO.setOrderStatus(2);
-                    break;
-                case shipped:
-                    orderVO.setOrderStatus(3);
-                    break;
-                case Receipt, AutoReceipt:
-                    orderVO.setOrderStatus(4);
-                    break;
-                // 申请退款返回类型为5
-                case Refund:
-                    orderVO.setOrderStatus(5);
-                    break;
-                // 退款成功返回类型为6
-                case RefundSuccess:
-                    orderVO.setOrderStatus(6);
-                    break;
-                // 订单取消或者超时自动取消返回类行为0
-                case Cancel, Expire:
-                    orderVO.setOrderStatus(0);
-                    break;
-            }
-            List<OrderGoodsVO> orderGoodsVOList = shopOrder.getShopOrderGoodsList().stream().map(orderGoods -> {
-                OrderGoodsVO orderGoodsVO = BeanUtil.copyProperties(orderGoods, OrderGoodsVO.class);
-                // 疯涨商品id
-                orderGoodsVO.setGoodsId(orderGoods.getGoodsId());
-                List<String> specification = new ArrayList<>();
-                // 封装商品规格
-                Map<String, String> specificationMap = JSONUtil.toBean(orderGoods.getSpecifications(), Map.class);
-                specificationMap.forEach((key, value) -> specification.add(value));
-                orderGoodsVO.setSpecifications(specification);
-                // 封装商品店铺名称以及id
-                ShopStore shopStore = goodsRepository.findById(orderGoods.getGoodsId()).get().getShopStore();
-                orderGoodsVO.setStoreId(shopStore.getId());
-                orderGoodsVO.setStoreName(shopStore.getName());
-                return orderGoodsVO;
-            }).toList();
+            Integer orderStatus = setOrderStatus(shopOrder.getOrderStatus());
+            orderVO.setOrderStatus(orderStatus);
+            List<OrderGoodsVO> orderGoodsVOList = setOrderGoodsList(shopOrder.getShopOrderGoodsList());
             orderVO.setOrderGoodsList(orderGoodsVOList);
             return orderVO;
         }).toList();
@@ -256,5 +216,68 @@ public class OrderServiceImpl implements OrderService {
             }
         });
         return Result.success(orderDataVO);
+    }
+
+    /**
+     * 根据订单id获取订单详情
+     *
+     * @param id 订单id
+     * @return 订单相关信息
+     */
+    public Result<OrderDetailVO> getOrderDetail(Long id) {
+        ShopOrder shopOrder = orderRepository.findById(id).get();
+        OrderDetailVO orderDetailVO = BeanUtil.copyProperties(shopOrder, OrderDetailVO.class);
+        List<OrderGoodsVO> orderGoodsList = setOrderGoodsList(shopOrder.getShopOrderGoodsList());
+        orderDetailVO.setOrderGoodsList(orderGoodsList);
+        Integer orderStatus = setOrderStatus(shopOrder.getOrderStatus());
+        orderDetailVO.setOrderStatus(orderStatus);
+        return Result.success(orderDetailVO);
+    }
+
+    /**
+     * 封装订单商品信息
+     *
+     * @param shopOrderGoodsList 订单商品列表
+     * @return 封装后的订单商品数据列表
+     */
+    private List<OrderGoodsVO> setOrderGoodsList(List<ShopOrderGoods> shopOrderGoodsList) {
+        return shopOrderGoodsList.stream().map(orderGoods -> {
+            OrderGoodsVO orderGoodsVO = BeanUtil.copyProperties(orderGoods, OrderGoodsVO.class);
+            // 封装商品id
+            orderGoodsVO.setGoodsId(orderGoods.getGoodsId());
+            List<String> specification = new ArrayList<>();
+            // 封装商品规格
+            Map<String, String> specificationMap = JSONUtil.toBean(orderGoods.getSpecifications(), Map.class);
+            specificationMap.forEach((key, value) -> specification.add(value));
+            orderGoodsVO.setSpecifications(specification);
+            // 封装商品店铺名称以及id
+            ShopStore shopStore = goodsRepository.findById(orderGoods.getGoodsId()).get().getShopStore();
+            orderGoodsVO.setStoreId(shopStore.getId());
+            orderGoodsVO.setStoreName(shopStore.getName());
+            return orderGoodsVO;
+        }).toList();
+    }
+
+    /**
+     * 匹配订单状态
+     *
+     * @param orderStatus 订单状态
+     */
+    private Integer setOrderStatus(Integer orderStatus) {
+        // 根据 type 值匹配
+        OrderStatusEnum orderStatusEnum = Arrays.stream(OrderStatusEnum.values()).filter(status -> status.getType().equals(orderStatus))  // 根据 type 值匹配
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Invalid order status"));
+        return switch (orderStatusEnum) {
+            case Unpaid -> 1;
+            case Unshipped -> 2;
+            case shipped -> 3;
+            case Receipt, AutoReceipt -> 4;
+            // 申请退款返回类型为5
+            case Refund -> 5;
+            // 退款成功返回类型为6
+            case RefundSuccess -> 6;
+            // 订单取消或者超时自动取消返回类行为0
+            case Cancel, Expire -> 0;
+        };
     }
 }

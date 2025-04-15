@@ -75,6 +75,7 @@ public class GoodsController {
 
     /**
      * 根据商品id获取商品详情
+     *
      * @param id 商品id
      * @return 商品详情对象
      */
@@ -85,11 +86,12 @@ public class GoodsController {
 
     /**
      * 获取用户可能喜欢的商品列表
+     *
      * @param mayLikeGoodsDTO 商品id集合
      * @return 用户可能喜欢的商品列表
      */
     @GetMapping("/like")
-    public Result<List<GoodsMessageVO>> getMayLikeGoods(@RequestParam List<Long> idList ) {
+    public Result<List<GoodsMessageVO>> getMayLikeGoods(@RequestParam(required = false) List<Long> idList) {
         return goodsService.getMayLikeGoods(idList);
     }
 }

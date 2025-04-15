@@ -3,6 +3,7 @@ package com.jackson.service;
 import com.jackson.dto.OrderDTO;
 import com.jackson.result.Result;
 import com.jackson.vo.OrderDataVO;
+import com.jackson.vo.OrderDetailVO;
 import com.jackson.vo.OrderVO;
 
 import java.time.LocalDateTime;
@@ -13,4 +14,6 @@ public interface OrderService {
     Result<List<OrderVO>> getOrderList(Integer type, String goodsNameOrOrderSnParam, LocalDateTime placeOrderTimeParam, LocalDateTime placeOrderEndTimeParam);
 
     Result<OrderDataVO> getOrderTypeNumberData();
+
+    Result<OrderDetailVO> getOrderDetail(Long id);
 }

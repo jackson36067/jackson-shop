@@ -359,11 +359,16 @@ public class GoodsServiceImpl implements GoodsService {
 
     /**
      * 获取用户可能喜欢的商品列表
+     *
      * @param idList 商品id集合
      * @return 用户可能喜欢的商品列表
      */
     public Result<List<GoodsMessageVO>> getMayLikeGoods(List<Long> idList) {
         PageRequest pageRequest = PageRequest.of(0, 10);
+        // 判断传递的商品id是否为空, 为空 -> 传递一个0长度的集合
+        if (idList == null || idList.isEmpty()) {
+            idList = new ArrayList<>(0);
+        }
         Page<ShopGood> userMayLikeGoodsList = goodsRepository.findRandomShopGoodsExcludingIds(idList, pageRequest);
         List<GoodsMessageVO> userMayLikeGoodsMessageList = userMayLikeGoodsList.stream()
                 .map(shopGood -> BeanUtil.copyProperties(shopGood, GoodsMessageVO.class))
