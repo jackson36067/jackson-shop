@@ -4,10 +4,13 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import com.jackson.constant.GoodsConstant;
+import com.jackson.constant.MemberConstant;
 import com.jackson.constant.OrderConstant;
 import com.jackson.constant.RabbitMQConstant;
 import com.jackson.context.BaseContext;
 import com.jackson.dto.OrderDTO;
+import com.jackson.dto.OrderGoodsDTO;
+import com.jackson.dto.OrderMessageDTO;
 import com.jackson.entity.ShopOrder;
 import com.jackson.entity.ShopOrderGoods;
 import com.jackson.entity.ShopStore;
@@ -50,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Transactional
     public Result<String> generateOrder(OrderDTO orderDTO) {
+        // 1. 封装订单数据
         ShopOrder shopOrder = BeanUtil.copyProperties(orderDTO, ShopOrder.class);
         shopOrder.setUserId(BaseContext.getCurrentId());
         long currentTimeMills = System.currentTimeMillis();
@@ -77,20 +81,20 @@ public class OrderServiceImpl implements OrderService {
             shopOrderGoods.setShopOrder(shopOrder);
             return shopOrderGoods;
         }).toList();
-        // 设置订单的商品信息
+        // 2. 设置订单的商品信息
         shopOrder.setShopOrderGoodsList(ShopOrderGoodsList);
         orderRepository.save(shopOrder);
-        // 异步更改商品库存信息
+        // 3. 异步更改商品库存信息
         Map<Long, Integer> orderProductInfo = new HashMap<>();
         orderDTO.getOrderGoodsList().forEach(orderGoods -> {
             orderProductInfo.put(orderGoods.getProductId(), orderGoods.getNumber());
         });
         rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_PRODUCT_QUEUE, orderProductInfo);
-        // 异步处理这次购买商品使用的优惠卷
+        // 4. 异步处理这次购买商品使用的优惠卷
         if (orderDTO.getUseCouponIdList() != null && !orderDTO.getUseCouponIdList().isEmpty()) {
             rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_COUPON_QUEUE, orderDTO.getUseCouponIdList());
         }
-        // 异步更改商品被购买数量
+        // 5. 异步更改商品被购买数量
         Map<Long, Integer> orderGoodsInfo = new HashMap<>();
         orderDTO.getOrderGoodsList().forEach(orderGoods -> {
             // 判断是否已经存在key,存在对数据类型累加
@@ -101,10 +105,16 @@ public class OrderServiceImpl implements OrderService {
             }
         });
         rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_GOODS_QUEUE, orderGoodsInfo);
-        // 如果是从购物车处下单,带上了购物车id,异步将购物车中商品移除
+        // 6. 如果是从购物车处下单,带上了购物车id,异步将购物车中商品移除
         if (orderDTO.getCartIdList() != null && !orderDTO.getCartIdList().isEmpty()) {
             rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_CART_QUEUE, orderDTO.getCartIdList());
         }
+        // 7. 异步向购买用户提供消息,谢谢购买商品
+        // key: 购买用户id value: 用户购买商品id集合
+        OrderMessageDTO orderMessageDTO = new OrderMessageDTO();
+        orderMessageDTO.setUserId(BaseContext.getCurrentId());
+        orderMessageDTO.setGoodsIds(orderDTO.getOrderGoodsList().stream().map(OrderGoodsDTO::getGoodsId).toList());
+        rabbitTemplate.convertAndSend(RabbitMQConstant.ORDER_MESSAGE_QUEUE, orderMessageDTO);
         return Result.success(orderSn);
     }
 
@@ -116,6 +126,9 @@ public class OrderServiceImpl implements OrderService {
      * @return 订单数据列表
      */
     public Result<List<OrderVO>> getOrderList(Integer type, String goodsNameOrOrderSnParam, LocalDateTime placeOrderTimeParam, LocalDateTime placeOrderEndTimeParam) {
+        if (BaseContext.getCurrentId() == null) {
+            return Result.success(new ArrayList<>());
+        }
         Specification<ShopOrder> shopOrderSpecification = (root, query, cb) -> {
             ArrayList<Predicate> predicateArrayList = new ArrayList<>();
             OrderTypeEnum orderStatusEnum = Arrays.stream(OrderTypeEnum.values()).filter(status -> status.getOrderType().equals(type))  // 根据 type 值匹配
@@ -161,6 +174,8 @@ public class OrderServiceImpl implements OrderService {
                 Predicate placeOrderTimeCondition = cb.between(root.get(OrderConstant.CREATE_TIME), placeOrderTimeParam, placeOrderEndTimeParam);
                 predicateArrayList.add(placeOrderTimeCondition);
             }
+            Predicate userCondition = cb.equal(root.get(OrderConstant.USER_ID), BaseContext.getCurrentId());
+            predicateArrayList.add(userCondition);
             return cb.and(predicateArrayList.toArray(new Predicate[0]));
         };
         List<ShopOrder> shopOrderList = orderRepository.findAll(shopOrderSpecification, Sort.by(Sort.Direction.DESC, OrderConstant.CREATE_TIME));

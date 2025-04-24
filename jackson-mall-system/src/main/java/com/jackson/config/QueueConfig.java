@@ -61,4 +61,9 @@ public class QueueConfig {
     public Queue genOrderCartQueue() {
         return QueueBuilder.durable(RabbitMQConstant.ORDER_CART_QUEUE).build();
     }
+
+    @Bean
+    public Queue genOrderMessageQueue() {
+        return QueueBuilder.durable(RabbitMQConstant.ORDER_MESSAGE_QUEUE).build();
+    }
 }

@@ -1,6 +1,7 @@
 package com.jackson.repository;
 
 import com.jackson.entity.ShopGood;
+import com.jackson.entity.ShopStore;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,4 +30,7 @@ public interface GoodsRepository extends JpaRepository<ShopGood, Long>, JpaSpeci
 
     // 筛选出热卖的商品
     List<ShopGood> findAllByIsHotAndActualSales(Boolean isHot, Integer actualSales);
+
+    @Query("select s.shopStore from ShopGood s where s.id in :ids")
+    List<ShopStore> findAllStoreByIdIn(List<Long> ids);
 }

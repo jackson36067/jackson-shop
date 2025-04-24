@@ -43,10 +43,13 @@ public class ShopStore {
     @Column(name = "avatar")
     private String avatar;
 
+    @Column(name = "service_id")
+    private Long serviceId;
+
     public ShopStore() {
     }
 
-    public ShopStore(Long id, String name, Short status, LocalDateTime createTime, LocalDateTime updateTime, List<ShopGood> shopGoodList, List<ShopCoupon> shopCouponList, String avatar) {
+    public ShopStore(Long id, String name, Short status, LocalDateTime createTime, LocalDateTime updateTime, List<ShopGood> shopGoodList, List<ShopCoupon> shopCouponList, String avatar, Long serviceId) {
         this.id = id;
         this.name = name;
         this.status = status;
@@ -55,6 +58,7 @@ public class ShopStore {
         this.shopGoodList = shopGoodList;
         this.shopCouponList = shopCouponList;
         this.avatar = avatar;
+        this.serviceId = serviceId;
     }
 
     public Long getId() {
@@ -121,16 +125,24 @@ public class ShopStore {
         this.avatar = avatar;
     }
 
+    public Long getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ShopStore shopStore = (ShopStore) o;
-        return Objects.equals(id, shopStore.id) && Objects.equals(name, shopStore.name) && Objects.equals(status, shopStore.status) && Objects.equals(createTime, shopStore.createTime) && Objects.equals(updateTime, shopStore.updateTime) && Objects.equals(shopGoodList, shopStore.shopGoodList) && Objects.equals(shopCouponList, shopStore.shopCouponList) && Objects.equals(avatar, shopStore.avatar);
+        return Objects.equals(id, shopStore.id) && Objects.equals(name, shopStore.name) && Objects.equals(status, shopStore.status) && Objects.equals(createTime, shopStore.createTime) && Objects.equals(updateTime, shopStore.updateTime) && Objects.equals(shopGoodList, shopStore.shopGoodList) && Objects.equals(shopCouponList, shopStore.shopCouponList) && Objects.equals(avatar, shopStore.avatar) && Objects.equals(serviceId, shopStore.serviceId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, status, createTime, updateTime, shopGoodList, shopCouponList, avatar);
+        return Objects.hash(id, name, status, createTime, updateTime, shopGoodList, shopCouponList, avatar, serviceId);
     }
 
     @Override
@@ -144,6 +156,7 @@ public class ShopStore {
                 ", shopGoodList=" + shopGoodList +
                 ", shopCouponList=" + shopCouponList +
                 ", avatar='" + avatar + '\'' +
+                ", serviceId=" + serviceId +
                 '}';
     }
 }

@@ -9,6 +9,7 @@
   <modules>
     <module>jackson-mall-common</module>
     <module>jackson-mall-tools</module>
+    <module>jackson-mall-system</module>
   </modules>
 
   <parent>

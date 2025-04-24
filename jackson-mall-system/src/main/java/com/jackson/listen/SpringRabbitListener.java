@@ -1,8 +1,12 @@
 package com.jackson.listen;
 
+import com.jackson.constant.MemberConstant;
+import com.jackson.constant.OrderConstant;
 import com.jackson.constant.RabbitMQConstant;
+import com.jackson.dto.OrderMessageDTO;
 import com.jackson.entity.*;
 import com.jackson.exception.InventoryNotSufficientException;
+import com.jackson.hanlder.MyWebSocketHandler;
 import com.jackson.repository.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -13,9 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -37,6 +39,14 @@ public class SpringRabbitListener {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Resource
     private CartRepository cartRepository;
+    @Resource
+    private MyWebSocketHandler myWebSocketHandler;
+    @Resource
+    private GoodsRepository goodsRepository;
+    @Resource
+    private ChatMessageRepository chatMessageRepository;
+    @Resource
+    private ChatThreadRepository chatThreadRepository;
 
     /**
      * 监听队列shop_queue的信息,将信息添加到数据库中,用户关注店铺信息
@@ -196,6 +206,7 @@ public class SpringRabbitListener {
 
     /**
      * 监听购物时,增加商品的实际售卖量
+     *
      * @param orderGoodsInfo 商品id以及售卖数量map
      */
     @RabbitListener(queues = RabbitMQConstant.ORDER_GOODS_QUEUE, concurrency = "5-10")
@@ -231,11 +242,80 @@ public class SpringRabbitListener {
 
     /**
      * 监听从购物车中购物,删除购物车中相关商品
+     *
      * @param cartGoodsIdList 购物车商品id
      */
     @RabbitListener(queues = RabbitMQConstant.ORDER_CART_QUEUE)
     public void listenOrderCartGoodsList(List<Long> cartGoodsIdList) {
         cartRepository.deleteAllByIdInBatch(cartGoodsIdList);
         log.info("监听购买购物车商品");
+    }
+
+    /**
+     * 用户购物后,向用户发送消息
+     *
+     * @param orderMessageDTO 消息info key: 用户id value: 用户购买商品id
+     */
+    @RabbitListener(queues = RabbitMQConstant.ORDER_MESSAGE_QUEUE, concurrency = "5-10")
+    public void listenOrderSendPurchaseMessage(OrderMessageDTO orderMessageDTO) {
+        // 1. 获取购买者是否连接websocket
+        Long userId = orderMessageDTO.getUserId();
+        boolean isOnline = myWebSocketHandler.isOnline(userId.toString());
+        // 2 获取商品店铺客服
+        List<ShopStore> ShopStoreList = goodsRepository.findAllStoreByIdIn(orderMessageDTO.getGoodsIds());
+        // 使用 HashSet 去重
+        HashSet<ShopStore> set = new HashSet<>(ShopStoreList);
+        // 将set集合转换回list集合
+        ShopStoreList = new ArrayList<>(set);
+        ShopStoreList.forEach(shopStore -> {
+            // 商品店铺客服id
+            Long serviceId = shopStore.getServiceId();
+            /* 商品店铺id */Long storeId = shopStore.getId();if (isOnline) {
+                // 判断用户是否在线
+                myWebSocketHandler.sendMessageToUser(userId.toString(), OrderConstant.PLACE_ORDER_MESSAGE);
+            } else {
+                // 将消息保存到redis中
+                stringRedisTemplate.opsForZSet().add(String.format(MemberConstant.USER_MESSAGE_KEY, userId, serviceId), OrderConstant.PLACE_ORDER_MESSAGE, System.currentTimeMillis());
+            }
+            // 获取该发送者以及接收者的聊天列表
+            ShopChatThread chatThread = chatThreadRepository.findByUserIdAndReceiverIdAndStoreId(userId, serviceId, storeId);
+            // 判断聊天列表是否存在
+            if (chatThread != null) {
+                // 存在 -> 更改数据
+                chatThread.setLastMessage(OrderConstant.PLACE_ORDER_MESSAGE);
+                chatThread.setLastMessageTime(LocalDateTime.now());
+                // 封装消息信息结果
+                List<ShopChatMessage> shopChatMessages = getShopChatMessages(storeId, userId, serviceId, chatThread);
+                chatThread.setShopChatMessages(shopChatMessages);
+                chatThreadRepository.saveAndFlush(chatThread);
+            } else {
+                chatThread = new ShopChatThread();
+                chatThread.setUserId(serviceId);
+                chatThread.setStoreId(storeId);
+                chatThread.setLastMessage(OrderConstant.PLACE_ORDER_MESSAGE);
+                chatThread.setActive(false);
+                chatThread.setReceiverId(userId);
+                chatThread.setLastMessageTime(LocalDateTime.now());
+                // 封装消息信息结果
+                List<ShopChatMessage> shopChatMessages = getShopChatMessages(storeId, userId, serviceId, chatThread);
+                chatThread.setShopChatMessages(shopChatMessages);
+                chatThreadRepository.save(chatThread);
+            }
+        });
+    }
+
+    // 封装聊天信息对象并返回
+    private static List<ShopChatMessage> getShopChatMessages(Long storeId, Long userId, Long serviceId, ShopChatThread shopChatThread) {
+        ShopChatMessage shopChatMessage = new ShopChatMessage();
+        shopChatMessage.setStoreId(storeId);
+        shopChatMessage.setReceiverId(userId);
+        shopChatMessage.setRead(false);
+        shopChatMessage.setDeleted(false);
+        shopChatMessage.setMessage(OrderConstant.PLACE_ORDER_MESSAGE);
+        shopChatMessage.setSenderId(serviceId);
+        shopChatMessage.setShopChatThread(shopChatThread);
+        ArrayList<ShopChatMessage> shopChatMessages = new ArrayList<>();
+        shopChatMessages.add(shopChatMessage);
+        return shopChatMessages;
     }
 }

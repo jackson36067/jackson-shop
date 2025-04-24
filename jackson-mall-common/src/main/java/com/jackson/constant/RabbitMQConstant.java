@@ -8,4 +8,5 @@ public class RabbitMQConstant {
     public static final String ORDER_PRODUCT_QUEUE = "order.product.queue";
     public static final String ORDER_GOODS_QUEUE = "order.goods.queue";
     public static final String ORDER_CART_QUEUE = "order.cart.queue";
+    public static final String ORDER_MESSAGE_QUEUE = "order.message.queue";
 }

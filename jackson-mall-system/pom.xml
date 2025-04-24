@@ -8,8 +8,8 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>jackson-mall-system</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>jackson-mall-system</name>
+    <packaging>jar</packaging>
     <description>jackson-mall-system</description>
     <url/>
     <licenses>
@@ -80,6 +80,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
     </dependencies>
 
