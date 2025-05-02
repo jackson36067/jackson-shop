@@ -270,7 +270,9 @@ public class SpringRabbitListener {
         ShopStoreList.forEach(shopStore -> {
             // 商品店铺客服id
             Long serviceId = shopStore.getServiceId();
-            /* 商品店铺id */Long storeId = shopStore.getId();if (isOnline) {
+            /* 商品店铺id */
+            Long storeId = shopStore.getId();
+            if (isOnline) {
                 // 判断用户是否在线
                 myWebSocketHandler.sendMessageToUser(userId.toString(), OrderConstant.PLACE_ORDER_MESSAGE);
             } else {
@@ -278,7 +280,7 @@ public class SpringRabbitListener {
                 stringRedisTemplate.opsForZSet().add(String.format(MemberConstant.USER_MESSAGE_KEY, userId, serviceId), OrderConstant.PLACE_ORDER_MESSAGE, System.currentTimeMillis());
             }
             // 获取该发送者以及接收者的聊天列表
-            ShopChatThread chatThread = chatThreadRepository.findByUserIdAndReceiverIdAndStoreId(userId, serviceId, storeId);
+            ShopChatThread chatThread = chatThreadRepository.findByUserIdAndReceiverId(userId, serviceId);
             // 判断聊天列表是否存在
             if (chatThread != null) {
                 // 存在 -> 更改数据
@@ -291,9 +293,9 @@ public class SpringRabbitListener {
             } else {
                 chatThread = new ShopChatThread();
                 chatThread.setUserId(serviceId);
-                chatThread.setStoreId(storeId);
+                chatThread.setSenderStoreId(storeId);
                 chatThread.setLastMessage(OrderConstant.PLACE_ORDER_MESSAGE);
-                chatThread.setActive(false);
+                chatThread.setIsDelete(false);
                 chatThread.setReceiverId(userId);
                 chatThread.setLastMessageTime(LocalDateTime.now());
                 // 封装消息信息结果

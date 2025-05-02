@@ -6,7 +6,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -26,8 +25,11 @@ public class ShopChatThread {
     @Column(name = "receiver_id", nullable = false)
     private Long receiverId;
 
-    @Column(name = "store_id")
-    private Long storeId;
+    @Column(name = "sender_store_id")
+    private Long senderStoreId;
+
+    @Column(name = "receiver_store_id")
+    private Long receiverStoreId;
 
     @Lob
     @Column(name = "last_message")
@@ -38,8 +40,8 @@ public class ShopChatThread {
     private LocalDateTime lastMessageTime;
 
     @ColumnDefault("1")
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Column(name = "is_delete")
+    private Boolean isDelete;
 
     @Column(name = "created_time")
     @CreatedDate
@@ -55,14 +57,15 @@ public class ShopChatThread {
     public ShopChatThread() {
     }
 
-    public ShopChatThread(Long id, Long userId, Long receiverId, Long storeId, String lastMessage, LocalDateTime lastMessageTime, Boolean isActive, LocalDateTime createdTime, LocalDateTime updatedTime, List<ShopChatMessage> shopChatMessages) {
+    public ShopChatThread(Long id, Long userId, Long receiverId, Long senderStoreId, Long receiverStoreId, String lastMessage, LocalDateTime lastMessageTime, Boolean isDelete, LocalDateTime createdTime, LocalDateTime updatedTime, List<ShopChatMessage> shopChatMessages) {
         this.id = id;
         this.userId = userId;
         this.receiverId = receiverId;
-        this.storeId = storeId;
+        this.senderStoreId = senderStoreId;
+        this.receiverStoreId = receiverStoreId;
         this.lastMessage = lastMessage;
         this.lastMessageTime = lastMessageTime;
-        this.isActive = isActive;
+        this.isDelete = isDelete;
         this.createdTime = createdTime;
         this.updatedTime = updatedTime;
         this.shopChatMessages = shopChatMessages;
@@ -92,12 +95,20 @@ public class ShopChatThread {
         this.receiverId = receiverId;
     }
 
-    public Long getStoreId() {
-        return storeId;
+    public Long getSenderStoreId() {
+        return senderStoreId;
     }
 
-    public void setStoreId(Long storeId) {
-        this.storeId = storeId;
+    public void setSenderStoreId(Long senderStoreId) {
+        this.senderStoreId = senderStoreId;
+    }
+
+    public Long getReceiverStoreId() {
+        return receiverStoreId;
+    }
+
+    public void setReceiverStoreId(Long receiverStoreId) {
+        this.receiverStoreId = receiverStoreId;
     }
 
     public String getLastMessage() {
@@ -116,12 +127,12 @@ public class ShopChatThread {
         this.lastMessageTime = lastMessageTime;
     }
 
-    public Boolean getActive() {
-        return isActive;
+    public Boolean getIsDelete() {
+        return isDelete;
     }
 
-    public void setActive(Boolean active) {
-        isActive = active;
+    public void setIsDelete(Boolean delete) {
+        isDelete = delete;
     }
 
     public LocalDateTime getCreatedTime() {
@@ -152,12 +163,12 @@ public class ShopChatThread {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ShopChatThread that = (ShopChatThread) o;
-        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(receiverId, that.receiverId) && Objects.equals(storeId, that.storeId) && Objects.equals(lastMessage, that.lastMessage) && Objects.equals(lastMessageTime, that.lastMessageTime) && Objects.equals(isActive, that.isActive) && Objects.equals(createdTime, that.createdTime) && Objects.equals(updatedTime, that.updatedTime) && Objects.equals(shopChatMessages, that.shopChatMessages);
+        return Objects.equals(id, that.id) && Objects.equals(userId, that.userId) && Objects.equals(receiverId, that.receiverId) && Objects.equals(senderStoreId, that.senderStoreId) && Objects.equals(receiverStoreId, that.receiverStoreId) && Objects.equals(lastMessage, that.lastMessage) && Objects.equals(lastMessageTime, that.lastMessageTime) && Objects.equals(isDelete, that.isDelete) && Objects.equals(createdTime, that.createdTime) && Objects.equals(updatedTime, that.updatedTime) && Objects.equals(shopChatMessages, that.shopChatMessages);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, receiverId, storeId, lastMessage, lastMessageTime, isActive, createdTime, updatedTime, shopChatMessages);
+        return Objects.hash(id, userId, receiverId, senderStoreId, receiverStoreId, lastMessage, lastMessageTime, isDelete, createdTime, updatedTime, shopChatMessages);
     }
 
     @Override
@@ -166,10 +177,11 @@ public class ShopChatThread {
                 "id=" + id +
                 ", userId=" + userId +
                 ", receiverId=" + receiverId +
-                ", storeId=" + storeId +
+                ", senderStoreId=" + senderStoreId +
+                ", receiverStoreId=" + receiverStoreId +
                 ", lastMessage='" + lastMessage + '\'' +
                 ", lastMessageTime=" + lastMessageTime +
-                ", isActive=" + isActive +
+                ", isDelete=" + isDelete +
                 ", createdTime=" + createdTime +
                 ", updatedTime=" + updatedTime +
                 ", shopChatMessages=" + shopChatMessages +

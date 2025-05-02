@@ -22,6 +22,8 @@ public class DateTimeFormatUtils {
 
         if (days < 1) {
             return "今日";
+        } else if (days == 1) {
+            return "昨天";
         } else if (days < 7) {
             return days + "天前";
         } else if (days < 30) {
@@ -53,5 +55,42 @@ public class DateTimeFormatUtils {
             // 超出今年的日期，显示 "yyyy年MM月dd日"
             return date.format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"));
         }
+    }
+
+    /**
+     * 规格化时间
+     *
+     * @param dateTime
+     * @return
+     */
+    public static String formatTime(LocalDateTime dateTime) {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 今天 -> 返回具体小时以及分钟
+        if (ChronoUnit.DAYS.between(dateTime, now) == 0) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            return dateTime.format(formatter);
+        }
+
+        // 昨天
+        if (ChronoUnit.DAYS.between(dateTime, now) == 1) {
+            return "昨天";
+        }
+
+        // 超过两天但小于一个月
+        if (ChronoUnit.DAYS.between(dateTime, now) < 30) {
+            long days = ChronoUnit.DAYS.between(dateTime, now);
+            return days + " 天前";
+        }
+
+        // 超过一个月但小于一年
+        if (ChronoUnit.MONTHS.between(dateTime, now) < 12) {
+            long months = ChronoUnit.MONTHS.between(dateTime, now);
+            return months + " 个月前";
+        }
+
+        // 超过一年
+        long years = ChronoUnit.YEARS.between(dateTime, now);
+        return years + " 年前";
     }
 }
