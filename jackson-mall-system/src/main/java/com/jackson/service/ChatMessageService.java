@@ -1,5 +1,6 @@
 package com.jackson.service;
 
+import com.jackson.dto.ChatMessageDTO;
 import com.jackson.result.Result;
 import com.jackson.vo.ChatThreadDetailVO;
 import com.jackson.vo.ChatThreadMessageVO;
@@ -12,4 +13,6 @@ public interface ChatMessageService {
     Result<Long> getUnReadMessageCount();
 
     Result<ChatThreadDetailVO> getChatMessageList(Long id);
+
+    void sendChatMessage(ChatMessageDTO chatMessageDTO);
 }

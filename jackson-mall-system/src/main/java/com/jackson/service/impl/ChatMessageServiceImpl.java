@@ -1,11 +1,16 @@
 package com.jackson.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.jackson.constant.MemberConstant;
+import com.jackson.constant.OrderConstant;
 import com.jackson.context.BaseContext;
+import com.jackson.dto.ChatMessageDTO;
+import com.jackson.entity.ShopChatMessage;
 import com.jackson.entity.ShopChatThread;
 import com.jackson.entity.ShopMember;
 import com.jackson.entity.ShopStore;
+import com.jackson.hanlder.MyWebSocketHandler;
 import com.jackson.repository.ChatThreadRepository;
 import com.jackson.repository.MemberRepository;
 import com.jackson.repository.StoreRepository;
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +41,8 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private MemberRepository memberRepository;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private MyWebSocketHandler myWebSocketHandler;
 
     /**
      * 获取用户聊天列表
@@ -159,38 +167,44 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         chatThreadDetailVO.setId(id);
         // 封装接收者信息,由于消息队列存储时,该用户可能为接收者,页可能为发送者, 需要判断一下
         if (Objects.equals(shopChatThread.getUserId(), currentId)) {
+            chatThreadDetailVO.setReceiverId(shopChatThread.getReceiverId());
             // 该用户作为发送者, 封装接收者信息
             if (shopChatThread.getReceiverStoreId() != null) {
                 // 接收者是一个客服,封装店铺信息
                 ShopStore shopStore = storeRepository.findById(shopChatThread.getReceiverStoreId()).get();
                 chatThreadDetailVO.setName(shopStore.getName());
-                chatThreadDetailVO.setStoreId(shopChatThread.getReceiverStoreId());
+                chatThreadDetailVO.setReceiverStoreId(shopChatThread.getReceiverStoreId());
+                chatThreadDetailVO.setSenderStoreId(shopChatThread.getSenderStoreId());
             } else {
                 // 接收者为一个用户,封装用户信息
                 ShopMember shopMember = memberRepository.findById(shopChatThread.getReceiverId()).get();
                 chatThreadDetailVO.setName(shopMember.getNickname());
                 chatThreadDetailVO.setReceiverId(shopChatThread.getReceiverId());
+                chatThreadDetailVO.setSenderStoreId(shopChatThread.getSenderStoreId());
             }
         } else if (Objects.equals(shopChatThread.getReceiverId(), currentId)) {
+            chatThreadDetailVO.setReceiverId(shopChatThread.getUserId());
             if (shopChatThread.getSenderStoreId() != null) {
                 // 接收者是一个客服,封装店铺信息
                 ShopStore shopStore = storeRepository.findById(shopChatThread.getSenderStoreId()).get();
                 chatThreadDetailVO.setName(shopStore.getName());
-                chatThreadDetailVO.setStoreId(shopChatThread.getSenderStoreId());
+                chatThreadDetailVO.setReceiverStoreId(shopChatThread.getSenderStoreId());
+                chatThreadDetailVO.setSenderStoreId(shopChatThread.getReceiverStoreId());
             } else {
                 // 接收者为一个用户,封装用户信息
                 ShopMember shopMember = memberRepository.findById(shopChatThread.getUserId()).get();
                 chatThreadDetailVO.setName(shopMember.getNickname());
                 chatThreadDetailVO.setReceiverId(shopChatThread.getUserId());
+                chatThreadDetailVO.setSenderStoreId(shopChatThread.getReceiverStoreId());
             }
         }
         // 封装消息队列消息列表
         List<ChatMessageVO> chatMessageList = shopChatThread.getShopChatMessages()
                 .stream()
                 .map(shopChatMessage -> {
-                    ChatMessageVO chatMessageVO = BeanUtil.copyProperties(shopChatThread, ChatMessageVO.class);
+                    ChatMessageVO chatMessageVO = BeanUtil.copyProperties(shopChatMessage, ChatMessageVO.class);
                     chatMessageVO.setUserId(shopChatMessage.getSenderId());
-                    if (shopChatMessage.getSenderId() != null) {
+                    if (shopChatMessage.getStoreId() != null) {
                         // 封装发送者信息,封装店铺信息
                         ShopStore shopStore = storeRepository.findById(shopChatMessage.getStoreId()).get();
                         chatMessageVO.setName(shopStore.getName());
@@ -205,5 +219,52 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                 .toList();
         chatThreadDetailVO.setChatMessageList(chatMessageList);
         return Result.success(chatThreadDetailVO);
+    }
+
+    /**
+     * 发送到消息
+     *
+     * @param chatMessageDTO 消息信息相关对象
+     */
+    public void sendChatMessage(ChatMessageDTO chatMessageDTO) {
+        // 判断是否是否连接websocket
+        Long receiverId = chatMessageDTO.getReceiverId();
+        boolean isOnline = myWebSocketHandler.isOnline(receiverId.toString());
+        Long userId = BaseContext.getCurrentId();
+        if (isOnline) {
+            ChatMessageVO chatMessageVO = new ChatMessageVO();
+            chatMessageVO.setUserId(userId);
+            chatMessageVO.setReceiverId(chatMessageVO.getReceiverId());
+            chatMessageVO.setMessage(chatMessageDTO.getMessage());
+            chatMessageVO.setIsRead(false);
+            chatMessageVO.setAvatar(chatMessageDTO.getAvatar());
+            chatMessageVO.setName(chatMessageDTO.getName());
+            String messageJsonStr = JSONUtil.toJsonStr(chatMessageVO);
+            myWebSocketHandler.sendMessageToUser(receiverId.toString(), messageJsonStr);
+        } else {
+            stringRedisTemplate.opsForZSet().add(String.format(MemberConstant.USER_MESSAGE_KEY, receiverId, userId), chatMessageDTO.getMessage(), System.currentTimeMillis());
+        }
+        ShopChatThread chatThread = chatThreadRepository.findById(chatMessageDTO.getId()).get();
+        chatThread.setLastMessage(OrderConstant.PLACE_ORDER_MESSAGE);
+        chatThread.setLastMessageTime(LocalDateTime.now());
+        List<ShopChatMessage> shopChatMessageList = chatThread.getShopChatMessages();
+        // 封装消息信息结果
+        ShopChatMessage shopChatMessage = getShopChatMessages(chatMessageDTO.getSenderStoreId(), userId, receiverId, chatThread, chatMessageDTO.getMessage());
+        shopChatMessageList.add(shopChatMessage);
+        chatThread.setShopChatMessages(shopChatMessageList);
+        chatThreadRepository.saveAndFlush(chatThread);
+    }
+
+    // 封装聊天信息对象并返回
+    private static ShopChatMessage getShopChatMessages(Long storeId, Long userId, Long receiverId, ShopChatThread shopChatThread, String message) {
+        ShopChatMessage shopChatMessage = new ShopChatMessage();
+        shopChatMessage.setStoreId(storeId);
+        shopChatMessage.setReceiverId(receiverId);
+        shopChatMessage.setIsRead(false);
+        shopChatMessage.setDeleted(false);
+        shopChatMessage.setMessage(message);
+        shopChatMessage.setSenderId(userId);
+        shopChatMessage.setShopChatThread(shopChatThread);
+        return shopChatMessage;
     }
 }

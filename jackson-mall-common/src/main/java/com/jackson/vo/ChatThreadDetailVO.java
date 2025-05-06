@@ -7,17 +7,19 @@ public class ChatThreadDetailVO {
     private Long id; // 消息聊天队列id
     private String name; // 店铺名称或者用户名称
     private Long receiverId; // 接收者id, 接收者为用户时存在
-    private Long storeId; // 存在,接收者为店铺
+    private Long receiverStoreId; // 存在,接收者为店铺
+    private Long senderStoreId; // 存在发送者为店铺
     private List<ChatMessageVO> chatMessageList; // 双方消息列表
 
     public ChatThreadDetailVO() {
     }
 
-    public ChatThreadDetailVO(Long id, String name, Long receiverId, Long storeId, List<ChatMessageVO> chatMessageList) {
+    public ChatThreadDetailVO(Long id, String name, Long receiverId, Long storeId, Long senderStoreId, List<ChatMessageVO> chatMessageList) {
         this.id = id;
         this.name = name;
         this.receiverId = receiverId;
-        this.storeId = storeId;
+        this.receiverStoreId = storeId;
+        this.senderStoreId = senderStoreId;
         this.chatMessageList = chatMessageList;
     }
 
@@ -45,12 +47,20 @@ public class ChatThreadDetailVO {
         this.receiverId = receiverId;
     }
 
-    public Long getStoreId() {
-        return storeId;
+    public Long getSenderStoreId() {
+        return senderStoreId;
     }
 
-    public void setStoreId(Long storeId) {
-        this.storeId = storeId;
+    public void setSenderStoreId(Long senderStoreId) {
+        this.senderStoreId = senderStoreId;
+    }
+
+    public Long getReceiverStoreId() {
+        return receiverStoreId;
+    }
+
+    public void setReceiverStoreId(Long receiverStoreId) {
+        this.receiverStoreId = receiverStoreId;
     }
 
     public List<ChatMessageVO> getChatMessageList() {
@@ -65,12 +75,12 @@ public class ChatThreadDetailVO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ChatThreadDetailVO that = (ChatThreadDetailVO) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(receiverId, that.receiverId) && Objects.equals(storeId, that.storeId) && Objects.equals(chatMessageList, that.chatMessageList);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(receiverId, that.receiverId) && Objects.equals(receiverStoreId, that.receiverStoreId) && Objects.equals(senderStoreId, that.senderStoreId) && Objects.equals(chatMessageList, that.chatMessageList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, receiverId, storeId, chatMessageList);
+        return Objects.hash(id, name, receiverId, receiverStoreId, senderStoreId, chatMessageList);
     }
 
     @Override
@@ -79,7 +89,8 @@ public class ChatThreadDetailVO {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", receiverId=" + receiverId +
-                ", storeId=" + storeId +
+                ", receiverStoreId=" + receiverStoreId +
+                ", senderStoreId=" + senderStoreId +
                 ", chatMessageList=" + chatMessageList +
                 '}';
     }

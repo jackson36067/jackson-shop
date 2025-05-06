@@ -1,5 +1,6 @@
 package com.jackson.listen;
 
+import cn.hutool.json.JSONUtil;
 import com.jackson.constant.MemberConstant;
 import com.jackson.constant.OrderConstant;
 import com.jackson.constant.RabbitMQConstant;
@@ -8,9 +9,11 @@ import com.jackson.entity.*;
 import com.jackson.exception.InventoryNotSufficientException;
 import com.jackson.hanlder.MyWebSocketHandler;
 import com.jackson.repository.*;
+import com.jackson.vo.ChatMessageVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -47,6 +50,8 @@ public class SpringRabbitListener {
     private ChatMessageRepository chatMessageRepository;
     @Resource
     private ChatThreadRepository chatThreadRepository;
+    @Resource
+    private StoreRepository storeRepository;
 
     /**
      * 监听队列shop_queue的信息,将信息添加到数据库中,用户关注店铺信息
@@ -273,8 +278,15 @@ public class SpringRabbitListener {
             /* 商品店铺id */
             Long storeId = shopStore.getId();
             if (isOnline) {
-                // 判断用户是否在线
-                myWebSocketHandler.sendMessageToUser(userId.toString(), OrderConstant.PLACE_ORDER_MESSAGE);
+                ChatMessageVO chatMessageVO = new ChatMessageVO();
+                chatMessageVO.setUserId(serviceId);
+                chatMessageVO.setReceiverId(userId);
+                chatMessageVO.setAvatar(shopStore.getAvatar());
+                chatMessageVO.setName(shopStore.getName());
+                chatMessageVO.setIsRead(false);
+                chatMessageVO.setMessage(OrderConstant.PLACE_ORDER_MESSAGE);
+                // 判断用户是否在线 -> 使用websocket发送信息时发送一个json字符串用于判断发送者以及接收者
+                myWebSocketHandler.sendMessageToUser(userId.toString(), JSONUtil.toJsonStr(chatMessageVO));
             } else {
                 // 将消息保存到redis中
                 stringRedisTemplate.opsForZSet().add(String.format(MemberConstant.USER_MESSAGE_KEY, userId, serviceId), OrderConstant.PLACE_ORDER_MESSAGE, System.currentTimeMillis());
@@ -311,7 +323,7 @@ public class SpringRabbitListener {
         ShopChatMessage shopChatMessage = new ShopChatMessage();
         shopChatMessage.setStoreId(storeId);
         shopChatMessage.setReceiverId(userId);
-        shopChatMessage.setRead(false);
+        shopChatMessage.setIsRead(false);
         shopChatMessage.setDeleted(false);
         shopChatMessage.setMessage(OrderConstant.PLACE_ORDER_MESSAGE);
         shopChatMessage.setSenderId(serviceId);

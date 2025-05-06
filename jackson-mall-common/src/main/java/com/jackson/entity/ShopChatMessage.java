@@ -25,7 +25,6 @@ public class ShopChatMessage {
     @Column(name = "receiver_id", nullable = false)
     private Long receiverId;
 
-    @Lob
     @Column(name = "message", nullable = false)
     private String message;
 
@@ -112,11 +111,11 @@ public class ShopChatMessage {
         this.storeId = storeId;
     }
 
-    public Boolean getRead() {
+    public Boolean getIsRead() {
         return isRead;
     }
 
-    public void setRead(Boolean read) {
+    public void setIsRead(Boolean read) {
         isRead = read;
     }
 

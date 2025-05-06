@@ -1,14 +1,12 @@
 package com.jackson.controller;
 
+import com.jackson.dto.ChatMessageDTO;
 import com.jackson.result.Result;
 import com.jackson.service.ChatMessageService;
 import com.jackson.vo.ChatThreadDetailVO;
 import com.jackson.vo.ChatThreadMessageVO;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -48,5 +46,10 @@ public class ChatMessageController {
     @GetMapping("/{id}")
     public Result<ChatThreadDetailVO> getChatMessageList(@PathVariable Long id) {
         return chatMessageService.getChatMessageList(id);
+    }
+
+    @PostMapping("/send")
+    public void sendChatMessage(@RequestBody ChatMessageDTO chatMessageDTO) {
+        chatMessageService.sendChatMessage(chatMessageDTO);
     }
 }
