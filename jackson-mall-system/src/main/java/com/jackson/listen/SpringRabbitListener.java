@@ -1,5 +1,6 @@
 package com.jackson.listen;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import com.jackson.constant.MemberConstant;
 import com.jackson.constant.OrderConstant;
@@ -13,7 +14,6 @@ import com.jackson.vo.ChatMessageVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -279,6 +279,7 @@ public class SpringRabbitListener {
             Long storeId = shopStore.getId();
             if (isOnline) {
                 ChatMessageVO chatMessageVO = new ChatMessageVO();
+                chatMessageVO.setId(Long.parseLong(IdUtil.simpleUUID()));
                 chatMessageVO.setUserId(serviceId);
                 chatMessageVO.setReceiverId(userId);
                 chatMessageVO.setAvatar(shopStore.getAvatar());

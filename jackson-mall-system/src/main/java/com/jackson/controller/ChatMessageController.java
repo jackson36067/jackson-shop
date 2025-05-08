@@ -48,6 +48,11 @@ public class ChatMessageController {
         return chatMessageService.getChatMessageList(id);
     }
 
+    /**
+     * 发送消息
+     *
+     * @param chatMessageDTO 消息信息相关对象
+     */
     @PostMapping("/send")
     public void sendChatMessage(@RequestBody ChatMessageDTO chatMessageDTO) {
         chatMessageService.sendChatMessage(chatMessageDTO);

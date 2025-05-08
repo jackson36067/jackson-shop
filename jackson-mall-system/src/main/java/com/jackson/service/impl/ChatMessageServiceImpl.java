@@ -3,7 +3,6 @@ package com.jackson.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.jackson.constant.MemberConstant;
-import com.jackson.constant.OrderConstant;
 import com.jackson.context.BaseContext;
 import com.jackson.dto.ChatMessageDTO;
 import com.jackson.entity.ShopChatMessage;
@@ -21,6 +20,7 @@ import com.jackson.vo.ChatMessageVO;
 import com.jackson.vo.ChatThreadDetailVO;
 import com.jackson.vo.ChatThreadMessageVO;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.Cursor;
@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class ChatMessageServiceImpl implements ChatMessageService {
     @Resource
     private ChatThreadRepository chatThreadRepository;
@@ -164,38 +165,56 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         ShopChatThread shopChatThread = chatThreadRepository.findById(id).get();
         Long currentId = BaseContext.getCurrentId();
         ChatThreadDetailVO chatThreadDetailVO = new ChatThreadDetailVO();
+        chatThreadDetailVO.setSenderId(currentId);
         chatThreadDetailVO.setId(id);
         // 封装接收者信息,由于消息队列存储时,该用户可能为接收者,页可能为发送者, 需要判断一下
         if (Objects.equals(shopChatThread.getUserId(), currentId)) {
             chatThreadDetailVO.setReceiverId(shopChatThread.getReceiverId());
-            // 该用户作为发送者, 封装接收者信息
+            // 删除该用户对该聊天用户的未读信息
+            stringRedisTemplate.delete(String.format(MemberConstant.USER_MESSAGE_KEY, currentId, shopChatThread.getReceiverId()));
+            // 封装接收者以及发送者是否为店铺客服
             if (shopChatThread.getReceiverStoreId() != null) {
                 // 接收者是一个客服,封装店铺信息
-                ShopStore shopStore = storeRepository.findById(shopChatThread.getReceiverStoreId()).get();
-                chatThreadDetailVO.setName(shopStore.getName());
                 chatThreadDetailVO.setReceiverStoreId(shopChatThread.getReceiverStoreId());
                 chatThreadDetailVO.setSenderStoreId(shopChatThread.getSenderStoreId());
             } else {
                 // 接收者为一个用户,封装用户信息
-                ShopMember shopMember = memberRepository.findById(shopChatThread.getReceiverId()).get();
-                chatThreadDetailVO.setName(shopMember.getNickname());
                 chatThreadDetailVO.setReceiverId(shopChatThread.getReceiverId());
                 chatThreadDetailVO.setSenderStoreId(shopChatThread.getSenderStoreId());
             }
-        } else if (Objects.equals(shopChatThread.getReceiverId(), currentId)) {
-            chatThreadDetailVO.setReceiverId(shopChatThread.getUserId());
+            // 封装发送者信息
             if (shopChatThread.getSenderStoreId() != null) {
-                // 接收者是一个客服,封装店铺信息
                 ShopStore shopStore = storeRepository.findById(shopChatThread.getSenderStoreId()).get();
                 chatThreadDetailVO.setName(shopStore.getName());
+                chatThreadDetailVO.setAvatar(shopStore.getAvatar());
+            } else {
+                ShopMember shopMember = memberRepository.findById(currentId).get();
+                chatThreadDetailVO.setName(shopMember.getNickname());
+                chatThreadDetailVO.setAvatar(shopMember.getAvatar());
+            }
+        } else if (Objects.equals(shopChatThread.getReceiverId(), currentId)) {
+            chatThreadDetailVO.setReceiverId(shopChatThread.getUserId());
+            // 删除该用户对该聊天用户的未读信息
+            stringRedisTemplate.delete(String.format(MemberConstant.USER_MESSAGE_KEY, currentId, shopChatThread.getUserId()));
+            // 封装接收者以及发送者是否为店铺客服
+            if (shopChatThread.getSenderStoreId() != null) {
+                // 接收者是一个客服,封装店铺信息
                 chatThreadDetailVO.setReceiverStoreId(shopChatThread.getSenderStoreId());
                 chatThreadDetailVO.setSenderStoreId(shopChatThread.getReceiverStoreId());
             } else {
                 // 接收者为一个用户,封装用户信息
-                ShopMember shopMember = memberRepository.findById(shopChatThread.getUserId()).get();
-                chatThreadDetailVO.setName(shopMember.getNickname());
                 chatThreadDetailVO.setReceiverId(shopChatThread.getUserId());
                 chatThreadDetailVO.setSenderStoreId(shopChatThread.getReceiverStoreId());
+            }
+            // 封装发送者信息
+            if (shopChatThread.getReceiverStoreId() != null) {
+                ShopStore shopStore = storeRepository.findById(shopChatThread.getReceiverStoreId()).get();
+                chatThreadDetailVO.setName(shopStore.getName());
+                chatThreadDetailVO.setAvatar(shopStore.getAvatar());
+            } else {
+                ShopMember shopMember = memberRepository.findById(currentId).get();
+                chatThreadDetailVO.setName(shopMember.getNickname());
+                chatThreadDetailVO.setAvatar(shopMember.getAvatar());
             }
         }
         // 封装消息队列消息列表
@@ -222,7 +241,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     /**
-     * 发送到消息
+     * 发送消息
      *
      * @param chatMessageDTO 消息信息相关对象
      */
@@ -230,26 +249,32 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         // 判断是否是否连接websocket
         Long receiverId = chatMessageDTO.getReceiverId();
         boolean isOnline = myWebSocketHandler.isOnline(receiverId.toString());
-        Long userId = BaseContext.getCurrentId();
+        // 发送的信息
+        String message = chatMessageDTO.getMessage();
+        // 发送信息用户id
+        Long userId = chatMessageDTO.getUserId();
         if (isOnline) {
             ChatMessageVO chatMessageVO = new ChatMessageVO();
+            // 将websocket发送的消息id设置成消息队列的id,便于前端添加消息
+            chatMessageVO.setId(chatMessageDTO.getId());
             chatMessageVO.setUserId(userId);
-            chatMessageVO.setReceiverId(chatMessageVO.getReceiverId());
-            chatMessageVO.setMessage(chatMessageDTO.getMessage());
+            chatMessageVO.setReceiverId(receiverId);
+            chatMessageVO.setMessage(message);
             chatMessageVO.setIsRead(false);
             chatMessageVO.setAvatar(chatMessageDTO.getAvatar());
             chatMessageVO.setName(chatMessageDTO.getName());
             String messageJsonStr = JSONUtil.toJsonStr(chatMessageVO);
+            log.info("webSocket sendMessage:{}", message);
             myWebSocketHandler.sendMessageToUser(receiverId.toString(), messageJsonStr);
         } else {
-            stringRedisTemplate.opsForZSet().add(String.format(MemberConstant.USER_MESSAGE_KEY, receiverId, userId), chatMessageDTO.getMessage(), System.currentTimeMillis());
+            stringRedisTemplate.opsForZSet().add(String.format(MemberConstant.USER_MESSAGE_KEY, receiverId, userId), message, System.currentTimeMillis());
         }
         ShopChatThread chatThread = chatThreadRepository.findById(chatMessageDTO.getId()).get();
-        chatThread.setLastMessage(OrderConstant.PLACE_ORDER_MESSAGE);
+        chatThread.setLastMessage(message);
         chatThread.setLastMessageTime(LocalDateTime.now());
         List<ShopChatMessage> shopChatMessageList = chatThread.getShopChatMessages();
         // 封装消息信息结果
-        ShopChatMessage shopChatMessage = getShopChatMessages(chatMessageDTO.getSenderStoreId(), userId, receiverId, chatThread, chatMessageDTO.getMessage());
+        ShopChatMessage shopChatMessage = getShopChatMessages(chatMessageDTO.getSenderStoreId(), userId, receiverId, chatThread, message);
         shopChatMessageList.add(shopChatMessage);
         chatThread.setShopChatMessages(shopChatMessageList);
         chatThreadRepository.saveAndFlush(chatThread);

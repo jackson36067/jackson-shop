@@ -58,6 +58,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
         String userId = extractUserIdFromUri(session);
         log.info("closed websocket connection:{}", userId);
+        log.info("close reason:{}", closeStatus.getReason());
     }
 
     /**
