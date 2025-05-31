@@ -25,12 +25,15 @@ public class JwtUserInterceptor implements HandlerInterceptor {
             return true;
         }
         String token = request.getHeader("Authorization");
-        // 这些地址直接放行,但还需要判断用户是否登录,如果登录了那么就封住用户id值
+        // 这些地址直接放行,但还需要判断用户是否登录,如果登录了那么就封装用户id值
         String uri = request.getRequestURI();
         List<String> allowPaths = Arrays.asList(
                 "/api/goods/detail",
                 "/api/cart/list",
-                "/api/search/list"
+                "/api/search/list",
+                "/api/message/unRead",
+                "/api/message/thread/list",
+                "/api/order/data"
         );
         boolean isMatch = allowPaths.stream().anyMatch(uri::startsWith);
         if (isMatch) {
