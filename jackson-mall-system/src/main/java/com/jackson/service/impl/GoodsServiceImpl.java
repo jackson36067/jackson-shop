@@ -348,12 +348,15 @@ public class GoodsServiceImpl implements GoodsService {
             goodsSpecificationList.add(goodsSpecificationVO);
         });
         goodsDetailVO.setGoodsSpecificationList(goodsSpecificationList);
-        // 异步保存用户浏览商品记录
-        Map<String, Long> userBrowseGoodsInfo = new HashMap<>();
-        userBrowseGoodsInfo.put("memberId", memberId);
-        userBrowseGoodsInfo.put("type", 0L);
-        userBrowseGoodsInfo.put("goodsId", id);
-        rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY, userBrowseGoodsInfo);
+        // 如果用户没用登录就不用保存了
+        if (memberId != null) {
+            // 异步保存用户浏览商品记录
+            Map<String, Long> userBrowseGoodsInfo = new HashMap<>();
+            userBrowseGoodsInfo.put("memberId", memberId);
+            userBrowseGoodsInfo.put("type", 0L);
+            userBrowseGoodsInfo.put("goodsId", id);
+            rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY, userBrowseGoodsInfo);
+        }
         return Result.success(goodsDetailVO);
     }
 

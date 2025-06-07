@@ -55,12 +55,15 @@ public class StoreServiceImpl implements StoreService {
         } else {
             storeVO.setIsFollow(false);
         }
-        // 将用户访问店铺添加到浏览记录表中 -> 异步处理,将店铺id以及
-        Map<String, Long> browseInfo = new HashMap<>();
-        browseInfo.put("storeId", id);
-        browseInfo.put("memberId", userId);
-        browseInfo.put("type", 1L);
-        rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY, browseInfo);
+        // 用户没有登录就不用了
+        if (userId != null) {
+            // 将用户访问店铺添加到浏览记录表中 -> 异步处理,将店铺id以及
+            Map<String, Long> browseInfo = new HashMap<>();
+            browseInfo.put("storeId", id);
+            browseInfo.put("memberId", userId);
+            browseInfo.put("type", 1L);
+            rabbitTemplate.convertAndSend(RabbitMQConstant.BROWSE_QUEUE_KEY, browseInfo);
+        }
         return Result.success(storeVO);
     }
 

@@ -29,7 +29,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                         "/api/goods/category/**",
                         "/api/goods/sku/**",
                         "/api/goods/like",
-                        "/ws/**"
+                        "/ws/**",
+                        "/api/coupon/use"
                 );
     }
 
@@ -54,7 +55,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")  // 允许所有路径
-                .allowedOrigins("http://localhost:3000","http://localhost")  // 允许所有域名
+                .allowedOrigins("http://localhost:3000", "http://localhost")  // 允许所有域名
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")  // 允许的方法
                 .allowedHeaders("*")  // 允许所有请求头
                 .allowCredentials(true)  // 允许携带 Cookie

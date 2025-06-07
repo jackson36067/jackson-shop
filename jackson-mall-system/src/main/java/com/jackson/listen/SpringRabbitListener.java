@@ -10,6 +10,7 @@ import com.jackson.entity.*;
 import com.jackson.exception.InventoryNotSufficientException;
 import com.jackson.hanlder.MyWebSocketHandler;
 import com.jackson.repository.*;
+import com.jackson.utils.MailUtils;
 import com.jackson.vo.ChatMessageVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -47,11 +48,9 @@ public class SpringRabbitListener {
     @Resource
     private GoodsRepository goodsRepository;
     @Resource
-    private ChatMessageRepository chatMessageRepository;
-    @Resource
     private ChatThreadRepository chatThreadRepository;
     @Resource
-    private StoreRepository storeRepository;
+    private MailUtils mailUtils;
 
     /**
      * 监听队列shop_queue的信息,将信息添加到数据库中,用户关注店铺信息
@@ -332,5 +331,13 @@ public class SpringRabbitListener {
         ArrayList<ShopChatMessage> shopChatMessages = new ArrayList<>();
         shopChatMessages.add(shopChatMessage);
         return shopChatMessages;
+    }
+
+    /**
+     * 监听接收错误信息的交换机的消息, 通过邮箱报警通知人工处理
+     */
+    @RabbitListener(queues = "error.queue")
+    public void handleErrorMessage(String errorMessage) {
+        mailUtils.sendMessage(RabbitMQConstant.ERROR_MESSAGE_ALERT_MAIL, "rabbitMQ消息无法处理", errorMessage);
     }
 }
