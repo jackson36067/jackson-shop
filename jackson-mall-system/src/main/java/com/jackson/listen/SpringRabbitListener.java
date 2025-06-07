@@ -14,6 +14,8 @@ import com.jackson.utils.MailUtils;
 import com.jackson.vo.ChatMessageVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -337,7 +339,26 @@ public class SpringRabbitListener {
      * 监听接收错误信息的交换机的消息, 通过邮箱报警通知人工处理
      */
     @RabbitListener(queues = "error.queue")
-    public void handleErrorMessage(String errorMessage) {
-        mailUtils.sendMessage(RabbitMQConstant.ERROR_MESSAGE_ALERT_MAIL, "rabbitMQ消息无法处理", errorMessage);
+    public void handleErrorMessage(Message message) {
+        MessageProperties props = message.getMessageProperties();
+
+        String originalExchange = props.getReceivedExchange();
+        String originalRoutingKey = props.getReceivedRoutingKey();
+        String originalMessage = new String(message.getBody());
+        String errorCause = props.getHeaders().get("x-exception-message") + "";
+
+        String errorDetails = String.format("""
+                        【RabbitMQ 消息异常告警】
+                        🧭 原交换机：%s
+                        📬 原路由键：%s
+                        📦 消息体：%s
+                        ❗ 异常信息：%s
+                        """,
+                originalExchange,
+                originalRoutingKey,
+                originalMessage,
+                errorCause);
+
+        mailUtils.sendMessage(RabbitMQConstant.ERROR_MESSAGE_ALERT_MAIL, "【MQ异常告警】消息消费失败", errorDetails);
     }
 }

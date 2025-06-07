@@ -7,6 +7,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.retry.MessageRecoverer;
 import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
  * 将消息转发到另一个交换机
  */
 @Configuration
+// 配置生效的条件, 配置类中需要启动消费值消费消息重试机制
+@ConditionalOnProperty(prefix = "spring.rabbit.listener.simple.retry", name = "enabled", havingValue = "true")
 public class RabbitMQErrorConfiguration {
     // 配置接收消息的新的交换机以及队列
     @Bean
