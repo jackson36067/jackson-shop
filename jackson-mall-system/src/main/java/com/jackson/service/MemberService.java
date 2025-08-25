@@ -22,4 +22,6 @@ public interface MemberService {
     void updateMemberPassword(UpdatePasswordDTO updatePasswordDTO);
 
     void updateMemberEmailDTO(UpdateEmailDTO updateEmailDTO);
+
+    void register(MemberRegisterDTO memberRegisterDTO);
 }

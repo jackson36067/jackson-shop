@@ -11,4 +11,6 @@ public class MemberConstant {
     // user:接受者id:message:发送者id
     public static final String USER_MESSAGE_KEY = "user:%s:message:%s";
     public static final String USER_MESSAGE_KEY_PREFIX = "user:%s:message:";
+    public static final String NICKNAME_EXIST = "用户名已存在";
+    public static final String MOBILE_EXIST = "手机号已存在";
 }

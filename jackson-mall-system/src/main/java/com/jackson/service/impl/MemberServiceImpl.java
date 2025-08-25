@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -205,5 +206,55 @@ public class MemberServiceImpl implements MemberService {
         shopMember = memberRepository.findById(BaseContext.getCurrentId()).get();
         shopMember.setEmail(updateEmailDTO.getNewEmail());
         memberRepository.saveAndFlush(shopMember);
+    }
+
+    /**
+     * 用户注册
+     *
+     * @param memberRegisterDTO 用户注册填写参数
+     */
+    public void register(MemberRegisterDTO memberRegisterDTO) {
+        // 判断邮箱是否已经存在
+        boolean isExistEmail = memberRepository.existsByEmail(memberRegisterDTO.getEmail());
+        if (isExistEmail) {
+            throw new EmailExistException(MemberConstant.EMAIL_EXIST);
+        }
+        // 判断用户名是否已经被占用
+        boolean isExistNickname = memberRepository.existsByNickname(memberRegisterDTO.getUsername());
+        if (isExistNickname) {
+            throw new NicknameExistException(MemberConstant.NICKNAME_EXIST);
+        }
+        // 判断手机号是否已经存在
+        boolean isExistMobile = memberRepository.existsByMobile(memberRegisterDTO.getPhone());
+        if (isExistMobile) {
+            throw new MobileExistException(MemberConstant.MOBILE_EXIST);
+        }
+        // 校验验证码是否正确
+        String emailCode = stringRedisTemplate.opsForValue().get(RedisConstant.SHOP_EMAIL_CODE_PREFIX + memberRegisterDTO.getEmail());
+        if (emailCode == null || !emailCode.equals(memberRegisterDTO.getEmailCode())) {
+            throw new CodeErrorException(MemberConstant.CODE_ERROR);
+        }
+        // 新增用户
+        // 密码保存需要加密
+        String md5Password = DigestUtils.md5DigestAsHex(memberRegisterDTO.getPassword().trim().getBytes());
+        LocalDateTime now = LocalDateTime.now();
+        ShopMember shopMember = new ShopMember(
+                null,
+                md5Password,
+                null,
+                null,
+                memberRegisterDTO.getEmail(),
+                null,
+                null,
+                null,
+                memberRegisterDTO.getUsername(),
+                memberRegisterDTO.getPhone(),
+                null,
+                (short) 0,
+                now,
+                now,
+                false
+        );
+        memberRepository.save(shopMember);
     }
 }

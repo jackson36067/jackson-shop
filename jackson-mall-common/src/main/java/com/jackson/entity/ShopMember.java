@@ -2,6 +2,9 @@ package com.jackson.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,61 +13,28 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "shop_member")
+@EntityListeners(AuditingEntityListener.class)
 public class ShopMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ColumnDefault("''")
-    @Column(name = "password", nullable = false, length = 63)
     private String password;
-
-    @ColumnDefault("0")
-    @Column(name = "gender", nullable = false)
     private Short gender;
-
-    @Column(name = "birthday")
     private LocalDate birthday;
-
-    @Column(name = "email", length = 50)
     private String email;
-
-    @Column(name = "last_login_time")
     private LocalDateTime lastLoginTime;
-
-    @ColumnDefault("''")
-    @Column(name = "last_login_ip", nullable = false, length = 63)
     private String lastLoginIp;
-
-    @ColumnDefault("0")
-    @Column(name = "user_level")
     private Short userLevel;
-
-    @ColumnDefault("''")
-    @Column(name = "nickname", nullable = false, length = 63)
     private String nickname;
-
-    @ColumnDefault("''")
-    @Column(name = "mobile", nullable = false, length = 20)
     private String mobile;
-
-    @ColumnDefault("''")
-    @Column(name = "avatar", nullable = false)
     private String avatar;
-
-    @ColumnDefault("0")
-    @Column(name = "status", nullable = false)
     private Short status;
-
-    @Column(name = "create_time")
+    @CreatedDate
     private LocalDateTime createTime;
-
-    @Column(name = "update_time")
+    @LastModifiedDate
     private LocalDateTime updateTime;
-
-    @ColumnDefault("0")
-    @Column(name = "del_flag")
     private Boolean delFlag;
 
 

@@ -83,10 +83,20 @@ public class MemberController {
 
     /**
      * 更改用户邮箱
+     *
      * @param updateEmailDTO
      */
     @PostMapping("/email")
     public void updateMemberEmail(@RequestBody UpdateEmailDTO updateEmailDTO) {
         memberService.updateMemberEmailDTO(updateEmailDTO);
+    }
+
+    /**
+     * 用户注册
+     * @param memberRegisterDTO 用户注册填写参数
+     */
+    @PostMapping("/register")
+    public void memberRegister(@RequestBody MemberRegisterDTO memberRegisterDTO) {
+        memberService.register(memberRegisterDTO);
     }
 }
